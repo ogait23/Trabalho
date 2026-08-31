@@ -2,7 +2,7 @@
 
 Trabalho da disciplina de Análise e Projeto Orientados a Objetos.
 
-Equipe: Tiago, João, Rudson
+Equipe: Tiago, João Victor Seki Mantovani, Rudson
 
 ## Sobre o projeto
 
