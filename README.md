@@ -12,5 +12,5 @@ Porções: batatas fritas, calabresa, frango a passarinho, aneis de cebola e pã
 Ideia central: Criar um site de pedido para uma pizzaria que utilizará:
 
 Linguagem: Python
-Framework: Django
+Framework: Flask
 Banco: PostgreSQL
