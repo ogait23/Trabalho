@@ -31,16 +31,20 @@ A pizzaria vende:
   checkout) e blueprint `admin` (gestão de produtos e pedidos), templates e
   arquivos estáticos
 - `migrations/` — migrations do banco (Flask-Migrate / Alembic)
-- `entrega-classes-casos-de-uso/` — entregas 3 e 4: diagrama de classes e
-  atributos e diagrama de casos de uso
+- `entrega-classes-casos-de-uso/` — entregas 3 e 4: `index.html` são os
+  slides para a apresentação e `detalhes.html` é o documento completo
+  (diagramas, regras de negócio e tabela de casos de uso)
 - `scripts/` — utilitários, como a geração do hash da senha do admin
 - `config.py`, `run.py` — configuração e ponto de entrada da aplicação
 
 ## Entregas
 
-- 03 — Identificação das classes e atributos — feito, ver
+- 03 — Identificação das classes e atributos — feito
+- 04 — Casos de uso — feito
+- Slides para a apresentação do dia 14/09:
   [entrega-classes-casos-de-uso/index.html](entrega-classes-casos-de-uso/index.html)
-- 04 — Casos de uso — feito, ver o mesmo arquivo acima
+- Documento completo (diagramas + regras + tabela de casos de uso):
+  [entrega-classes-casos-de-uso/detalhes.html](entrega-classes-casos-de-uso/detalhes.html)
 - Modelos, migrations e implementação Flask — em andamento
 
 ## Como rodar localmente
