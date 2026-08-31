@@ -1,0 +1,485 @@
+<title>Modelagem Fornatta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F3F2ED;
+    --surface: #FFFFFF;
+    --ink: #211F1B;
+    --ink-muted: #6B6659;
+    --line: #DAD5C8;
+    --accent: #B3401F;
+    --accent-soft: #ECD9CD;
+    --accent-ink: #7A2C15;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1B1917;
+      --surface: #232019;
+      --ink: #EEE9DF;
+      --ink-muted: #A69E8C;
+      --line: #3B362C;
+      --accent: #E2794F;
+      --accent-soft: #3A2A20;
+      --accent-ink: #F0A67D;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1B1917;
+    --surface: #232019;
+    --ink: #EEE9DF;
+    --ink-muted: #A69E8C;
+    --line: #3B362C;
+    --accent: #E2794F;
+    --accent-soft: #3A2A20;
+    --accent-ink: #F0A67D;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+    line-height: 1.5;
+  }
+  .page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  .hero { display: flex; flex-direction: column; gap: 14px; }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent-ink);
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(30px, 4vw, 44px);
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  .dek {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--ink-muted);
+    font-size: 16px;
+  }
+  .meta {
+    margin: 10px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 40px;
+    padding: 18px 0 0;
+    border-top: 1px solid var(--line);
+  }
+  .meta div { display: flex; flex-direction: column; gap: 4px; }
+  .meta dt {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+  }
+  .meta dd {
+    margin: 0;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 13.5px;
+  }
+
+  .entrega { display: flex; flex-direction: column; gap: 22px; }
+  .entrega-head {
+    display: flex;
+    gap: 18px;
+    align-items: baseline;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .entrega-num {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 34px;
+    font-weight: 600;
+    color: var(--accent-soft);
+    -webkit-text-stroke: 1px var(--accent-ink);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .entrega-head h2 { margin: 0 0 4px; font-size: 22px; font-weight: 700; }
+  .entrega-head p { margin: 0; color: var(--ink-muted); font-size: 14.5px; max-width: 60ch; }
+
+  figure.diagrama { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .diagrama-scroll {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px;
+  }
+  .diagrama-scroll svg { display: block; width: 100%; min-width: 860px; height: auto; }
+  figcaption { color: var(--ink-muted); font-size: 13px; }
+
+  .regras {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+  .regras h3 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-muted);
+  }
+  .regras ul { margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 8px; }
+  .regras li { font-size: 14px; }
+  .regras code {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+
+  .tabela-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 760px; }
+  thead th {
+    text-align: left;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 10px 14px;
+    position: sticky;
+    top: 0;
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) { background: color-mix(in srgb, var(--surface) 92%, var(--ink) 3%); }
+  td.id, td.ator {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 12px;
+    white-space: nowrap;
+    color: var(--ink-muted);
+  }
+  td.nome { font-weight: 600; }
+
+  footer {
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-muted);
+    font-size: 13px;
+  }
+</style>
+
+<div class="page">
+
+  <header class="hero">
+    <p class="eyebrow">Análise e Projeto Orientado a Objetos · Pizzaria Fornatta</p>
+    <h1>Classes e Casos de Uso</h1>
+    <p class="dek">Entrega 3 (identificação das classes e atributos) e entrega 4 (casos de uso) do sistema de pedidos da Pizzaria Fornatta.</p>
+    <dl class="meta">
+      <div><dt>Equipe</dt><dd>Tiago · João · Rudson</dd></div>
+      <div><dt>Disciplina</dt><dd>Análise e Projeto Orientados a Objetos</dd></div>
+      <div><dt>Stack</dt><dd>Python · Flask · PostgreSQL</dd></div>
+      <div><dt>Data</dt><dd>31/08/2026</dd></div>
+    </dl>
+  </header>
+
+  <section class="entrega" id="classes">
+    <div class="entrega-head">
+      <span class="entrega-num">03</span>
+      <div>
+        <h2>Identificação das classes e atributos</h2>
+        <p>Estrutura do sistema: as seis classes de domínio, seus atributos e como se relacionam entre si.</p>
+      </div>
+    </div>
+
+    <figure class="diagrama">
+      <div class="diagrama-scroll">
+        <svg viewBox="0 0 1300 560" role="img" aria-label="Diagrama de classes com Categoria, Produto, Tamanho, Cliente, Pedido e ItemPedido, mostrando atributos e relacionamentos, com composição entre Pedido e ItemPedido">
+
+          <line x1="170" y1="190" x2="170" y2="283" stroke="var(--ink-muted)" stroke-width="1.5"/>
+          <line x1="650" y1="160" x2="650" y2="295" stroke="var(--ink-muted)" stroke-width="1.5"/>
+          <line x1="1130" y1="170" x2="1130" y2="255" stroke="var(--ink-muted)" stroke-width="1.5"/>
+          <line x1="300" y1="360" x2="500" y2="360" stroke="var(--ink-muted)" stroke-width="1.5"/>
+          <line x1="300" y1="400" x2="500" y2="400" stroke="var(--ink-muted)" stroke-width="1.5"/>
+          <line x1="800" y1="380" x2="982" y2="380" stroke="var(--ink-muted)" stroke-width="1.5"/>
+          <polygon points="1000,380 991,374 982,380 991,386" fill="var(--surface)" stroke="var(--ink-muted)" stroke-width="1.5"/>
+
+          <text x="178" y="205" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--ink-muted)">1</text>
+          <text x="178" y="270" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--ink-muted)">0..*</text>
+          <text x="178" y="240" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="var(--accent-ink)">categoria</text>
+
+          <text x="658" y="178" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--ink-muted)">1</text>
+          <text x="658" y="286" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--ink-muted)">0..*</text>
+          <text x="658" y="232" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="var(--accent-ink)">tamanho {opcional}</text>
+
+          <text x="1138" y="185" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--ink-muted)">1</text>
+          <text x="1138" y="245" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--ink-muted)">0..*</text>
+          <text x="1138" y="215" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="var(--accent-ink)">pedidos</text>
+
+          <text x="308" y="352" font-family="IBM Plex Mono, monospace" font-size="11">1</text>
+          <text x="465" y="352" font-family="IBM Plex Mono, monospace" font-size="11">0..*</text>
+          <text x="360" y="352" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="var(--accent-ink)">produto</text>
+
+          <text x="308" y="418" font-family="IBM Plex Mono, monospace" font-size="11">1</text>
+          <text x="465" y="418" font-family="IBM Plex Mono, monospace" font-size="11">0..*</text>
+          <text x="345" y="418" font-family="IBM Plex Sans, sans-serif" font-size="12">segundoSabor {opcional}</text>
+
+          <text x="810" y="372" font-family="IBM Plex Mono, monospace" font-size="11">1..*</text>
+          <text x="955" y="372" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="end">1</text>
+          <text x="885" y="372" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="var(--accent-ink)">itens (composição)</text>
+
+          <g>
+            <rect x="40" y="40" width="260" height="150" rx="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="170" y="62" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="700" fill="var(--ink)">Categoria</text>
+            <line x1="40" y1="74" x2="300" y2="74" stroke="var(--line)" stroke-width="1"/>
+            <text x="54" y="94" font-family="IBM Plex Mono, monospace" font-size="12.5">- id : integer</text>
+            <text x="54" y="112" font-family="IBM Plex Mono, monospace" font-size="12.5">- nome : string</text>
+            <text x="54" y="130" font-family="IBM Plex Mono, monospace" font-size="12.5">- tipo : string</text>
+            <line x1="40" y1="138" x2="300" y2="138" stroke="var(--line)" stroke-width="1"/>
+            <text x="54" y="158" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--accent-ink)">+ ehPizza() : bool</text>
+          </g>
+
+          <g>
+            <rect x="40" y="283" width="260" height="195" rx="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="170" y="305" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="700" fill="var(--ink)">Produto</text>
+            <line x1="40" y1="317" x2="300" y2="317" stroke="var(--line)" stroke-width="1"/>
+            <text x="54" y="337" font-family="IBM Plex Mono, monospace" font-size="12.5">- id : integer</text>
+            <text x="54" y="355" font-family="IBM Plex Mono, monospace" font-size="12.5">- nome : string</text>
+            <text x="54" y="373" font-family="IBM Plex Mono, monospace" font-size="12.5">- descricao : text</text>
+            <text x="54" y="391" font-family="IBM Plex Mono, monospace" font-size="12.5">- preco : decimal</text>
+            <text x="54" y="409" font-family="IBM Plex Mono, monospace" font-size="12.5">- disponivel : bool</text>
+            <line x1="40" y1="417" x2="300" y2="417" stroke="var(--line)" stroke-width="1"/>
+            <text x="54" y="437" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--accent-ink)">+ ehPizza() : bool</text>
+          </g>
+
+          <g>
+            <rect x="520" y="40" width="260" height="120" rx="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="650" y="62" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="700" fill="var(--ink)">Tamanho</text>
+            <line x1="520" y1="74" x2="780" y2="74" stroke="var(--line)" stroke-width="1"/>
+            <text x="534" y="94" font-family="IBM Plex Mono, monospace" font-size="12.5">- id : integer</text>
+            <text x="534" y="112" font-family="IBM Plex Mono, monospace" font-size="12.5">- nome : string</text>
+            <text x="534" y="130" font-family="IBM Plex Mono, monospace" font-size="12.5">- precoAdicional : decimal</text>
+            <text x="534" y="148" font-family="IBM Plex Mono, monospace" font-size="12.5">- ordem : integer</text>
+          </g>
+
+          <g>
+            <rect x="500" y="295" width="300" height="170" rx="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="650" y="317" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="700" fill="var(--ink)">ItemPedido</text>
+            <line x1="500" y1="329" x2="800" y2="329" stroke="var(--line)" stroke-width="1"/>
+            <text x="514" y="349" font-family="IBM Plex Mono, monospace" font-size="12.5">- id : integer</text>
+            <text x="514" y="367" font-family="IBM Plex Mono, monospace" font-size="12.5">- quantidade : integer</text>
+            <text x="514" y="385" font-family="IBM Plex Mono, monospace" font-size="12.5">- precoUnitario : decimal</text>
+            <line x1="500" y1="393" x2="800" y2="393" stroke="var(--line)" stroke-width="1"/>
+            <text x="514" y="413" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--accent-ink)">+ subtotal() : decimal</text>
+          </g>
+
+          <g>
+            <rect x="1000" y="40" width="260" height="130" rx="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="1130" y="62" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="700" fill="var(--ink)">Cliente</text>
+            <line x1="1000" y1="74" x2="1260" y2="74" stroke="var(--line)" stroke-width="1"/>
+            <text x="1014" y="94" font-family="IBM Plex Mono, monospace" font-size="12.5">- id : integer</text>
+            <text x="1014" y="112" font-family="IBM Plex Mono, monospace" font-size="12.5">- nome : string</text>
+            <text x="1014" y="130" font-family="IBM Plex Mono, monospace" font-size="12.5">- telefone : string</text>
+            <text x="1014" y="148" font-family="IBM Plex Mono, monospace" font-size="12.5">- enderecoEntrega : string</text>
+          </g>
+
+          <g>
+            <rect x="1000" y="255" width="260" height="250" rx="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="1130" y="277" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="700" fill="var(--ink)">Pedido</text>
+            <line x1="1000" y1="289" x2="1260" y2="289" stroke="var(--line)" stroke-width="1"/>
+            <text x="1014" y="309" font-family="IBM Plex Mono, monospace" font-size="12.5">- id : integer</text>
+            <text x="1014" y="327" font-family="IBM Plex Mono, monospace" font-size="12.5">- dataCriacao : datetime</text>
+            <text x="1014" y="345" font-family="IBM Plex Mono, monospace" font-size="12.5">- tipoEntrega : string</text>
+            <text x="1014" y="363" font-family="IBM Plex Mono, monospace" font-size="12.5">- formaPagamento : string</text>
+            <text x="1014" y="381" font-family="IBM Plex Mono, monospace" font-size="12.5">- status : string</text>
+            <text x="1014" y="399" font-family="IBM Plex Mono, monospace" font-size="12.5">- taxaEntrega : decimal</text>
+            <text x="1014" y="417" font-family="IBM Plex Mono, monospace" font-size="12.5">- total : decimal</text>
+            <line x1="1000" y1="425" x2="1260" y2="425" stroke="var(--line)" stroke-width="1"/>
+            <text x="1014" y="445" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--accent-ink)">+ recalcularTotal() : decimal</text>
+            <text x="1014" y="463" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--accent-ink)">+ estaBloqueado() : bool</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>Losango cheio (◆) indica composição: um ItemPedido não existe sem o Pedido ao qual pertence. Produto se associa duas vezes a ItemPedido, como sabor principal e como segundo sabor opcional.</figcaption>
+    </figure>
+
+    <div class="regras">
+      <h3>Regras de negócio modeladas</h3>
+      <ul>
+        <li>Excluir um <code>Pedido</code> exclui em cascata seus <code>ItemPedido</code>; um item nunca existe sem pedido.</li>
+        <li><code>ItemPedido.tamanho</code> é obrigatório quando o produto é pizza, e proibido nos demais casos.</li>
+        <li><code>ItemPedido.segundoSabor</code>, quando informado, precisa ser da mesma categoria do produto principal.</li>
+        <li><code>precoUnitario</code> é o maior valor entre produto e segundo sabor, somado ao adicional do tamanho, e é copiado no momento da criação do item — não muda se o cardápio mudar depois.</li>
+        <li><code>Pedido.total</code> = soma de <code>precoUnitario × quantidade</code> de todos os itens, mais <code>taxaEntrega</code> apenas quando <code>tipoEntrega</code> for "entrega".</li>
+        <li>Pedido com status <code>entregue</code> ou <code>cancelado</code> não pode mais ser alterado.</li>
+        <li>Produto com <code>disponivel = falso</code> não aparece no cardápio.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="entrega" id="casos-de-uso">
+    <div class="entrega-head">
+      <span class="entrega-num">04</span>
+      <div>
+        <h2>Casos de uso</h2>
+        <p>Comportamento do sistema: como os dois atores — Cliente e Administrador — interagem com o sistema de pedidos.</p>
+      </div>
+    </div>
+
+    <figure class="diagrama">
+      <div class="diagrama-scroll">
+        <svg viewBox="0 0 1300 760" role="img" aria-label="Diagrama de casos de uso com os atores Cliente e Administrador interagindo com o sistema de pedidos da Pizzaria Fornatta, incluindo a extensão de escolha de tamanho e sabor para pizzas">
+
+          <rect x="170" y="40" width="960" height="680" rx="16" fill="var(--surface)" stroke="var(--ink-muted)" stroke-width="1.5"/>
+          <text x="650" y="66" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="var(--ink-muted)">Sistema de Pedidos — Pizzaria Fornatta</text>
+
+          <g stroke="var(--ink-muted)" stroke-width="1.25">
+            <line x1="104" y1="385" x2="240" y2="110"/>
+            <line x1="104" y1="385" x2="240" y2="224"/>
+            <line x1="104" y1="385" x2="240" y2="338"/>
+            <line x1="104" y1="385" x2="240" y2="452"/>
+            <line x1="104" y1="385" x2="240" y2="566"/>
+            <line x1="104" y1="385" x2="240" y2="680"/>
+          </g>
+
+          <g stroke="var(--ink-muted)" stroke-width="1.25">
+            <line x1="1196" y1="385" x2="1060" y2="110"/>
+            <line x1="1196" y1="385" x2="1060" y2="224"/>
+            <line x1="1196" y1="385" x2="1060" y2="338"/>
+            <line x1="1196" y1="385" x2="1060" y2="452"/>
+            <line x1="1196" y1="385" x2="1060" y2="566"/>
+            <line x1="1196" y1="385" x2="1060" y2="680"/>
+          </g>
+
+          <line x1="605" y1="338" x2="522" y2="338" stroke="var(--accent-ink)" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <polygon points="520,338 530,333 530,343" fill="var(--accent-ink)"/>
+          <text x="562" y="326" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--accent-ink)">«extend»</text>
+          <text x="562" y="352" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" font-style="italic" fill="var(--ink-muted)">{produto é pizza}</text>
+
+          <g font-family="IBM Plex Sans, sans-serif">
+            <ellipse cx="380" cy="110" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="380" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC01</text>
+            <text x="380" y="120" text-anchor="middle" font-size="13">Consultar cardápio</text>
+
+            <ellipse cx="380" cy="224" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="380" y="219" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC02</text>
+            <text x="380" y="234" text-anchor="middle" font-size="13">Ver produto</text>
+
+            <ellipse cx="380" cy="338" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="380" y="333" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC03</text>
+            <text x="380" y="348" text-anchor="middle" font-size="13">Adicionar ao carrinho</text>
+
+            <ellipse cx="380" cy="452" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="380" y="447" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC04</text>
+            <text x="380" y="462" text-anchor="middle" font-size="13">Gerenciar carrinho</text>
+
+            <ellipse cx="380" cy="566" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="380" y="561" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC05</text>
+            <text x="380" y="576" text-anchor="middle" font-size="13">Finalizar pedido</text>
+
+            <ellipse cx="380" cy="680" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="380" y="675" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC06</text>
+            <text x="380" y="690" text-anchor="middle" font-size="13">Ver confirmação</text>
+          </g>
+
+          <ellipse cx="670" cy="338" rx="85" ry="28" fill="var(--accent-soft)" stroke="var(--accent-ink)" stroke-width="1.25"/>
+          <text x="670" y="334" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="var(--accent-ink)">UC03a</text>
+          <text x="670" y="348" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="var(--accent-ink)">Escolher tamanho/sabor</text>
+
+          <g font-family="IBM Plex Sans, sans-serif">
+            <ellipse cx="920" cy="110" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="920" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC07</text>
+            <text x="920" y="120" text-anchor="middle" font-size="13">Autenticar-se</text>
+
+            <ellipse cx="920" cy="224" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="920" y="219" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC08</text>
+            <text x="920" y="234" text-anchor="middle" font-size="13">Gerenciar categorias</text>
+
+            <ellipse cx="920" cy="338" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="920" y="333" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC09</text>
+            <text x="920" y="348" text-anchor="middle" font-size="13">Gerenciar produtos</text>
+
+            <ellipse cx="920" cy="452" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="920" y="447" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC10</text>
+            <text x="920" y="462" text-anchor="middle" font-size="13">Gerenciar tamanhos</text>
+
+            <ellipse cx="920" cy="566" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="920" y="561" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC11</text>
+            <text x="920" y="576" text-anchor="middle" font-size="13">Listar pedidos</text>
+
+            <ellipse cx="920" cy="680" rx="140" ry="34" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="920" y="675" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-ink)">UC12</text>
+            <text x="920" y="690" text-anchor="middle" font-size="13">Atualizar status</text>
+          </g>
+
+          <g>
+            <circle cx="90" cy="360" r="12" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+            <line x1="90" y1="372" x2="90" y2="410" stroke="var(--ink)" stroke-width="1.5"/>
+            <line x1="72" y1="385" x2="108" y2="385" stroke="var(--ink)" stroke-width="1.5"/>
+            <line x1="90" y1="410" x2="74" y2="435" stroke="var(--ink)" stroke-width="1.5"/>
+            <line x1="90" y1="410" x2="106" y2="435" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="90" y="455" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600">Cliente</text>
+          </g>
+
+          <g>
+            <circle cx="1210" cy="360" r="12" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+            <line x1="1210" y1="372" x2="1210" y2="410" stroke="var(--ink)" stroke-width="1.5"/>
+            <line x1="1192" y1="385" x2="1228" y2="385" stroke="var(--ink)" stroke-width="1.5"/>
+            <line x1="1210" y1="410" x2="1194" y2="435" stroke="var(--ink)" stroke-width="1.5"/>
+            <line x1="1210" y1="410" x2="1226" y2="435" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="1210" y="455" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600">Administrador</text>
+            <text x="1210" y="472" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="var(--ink-muted)">exige UC07 em tudo</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>UC03a estende UC03 apenas quando o produto escolhido é uma pizza, exigindo tamanho e permitindo um segundo sabor da mesma categoria.</figcaption>
+    </figure>
+
+    <div class="tabela-scroll">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Caso de uso</th><th>Ator</th><th>Descrição</th><th>Pré-condição / regra</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="id">UC01</td><td class="nome">Consultar cardápio</td><td class="ator">Cliente</td><td>Lista os produtos disponíveis, agrupados por categoria.</td><td>Produtos indisponíveis não aparecem.</td></tr>
+          <tr><td class="id">UC02</td><td class="nome">Ver detalhes do produto</td><td class="ator">Cliente</td><td>Mostra nome, descrição, preço e, para pizzas, tamanhos e outros sabores da categoria.</td><td>Produto precisa estar disponível.</td></tr>
+          <tr><td class="id">UC03</td><td class="nome">Adicionar ao carrinho</td><td class="ator">Cliente</td><td>Inclui o produto e a quantidade escolhidos no carrinho da sessão.</td><td>—</td></tr>
+          <tr><td class="id">UC03a</td><td class="nome">Escolher tamanho e segundo sabor</td><td class="ator">Cliente</td><td>Estende UC03 quando o produto é pizza: exige tamanho e permite um segundo sabor.</td><td>Segundo sabor deve ser da mesma categoria do primeiro.</td></tr>
+          <tr><td class="id">UC04</td><td class="nome">Gerenciar carrinho</td><td class="ator">Cliente</td><td>Altera a quantidade de um item ou o remove antes de finalizar.</td><td>—</td></tr>
+          <tr><td class="id">UC05</td><td class="nome">Finalizar pedido</td><td class="ator">Cliente</td><td>Informa dados do cliente, tipo de entrega e forma de pagamento; grava o pedido e calcula o total.</td><td>Preço unitário é copiado do cardápio no momento da criação do item.</td></tr>
+          <tr><td class="id">UC06</td><td class="nome">Ver confirmação</td><td class="ator">Cliente</td><td>Mostra o número do pedido e o resumo de itens e valores.</td><td>Pedido precisa ter sido criado.</td></tr>
+          <tr><td class="id">UC07</td><td class="nome">Autenticar-se</td><td class="ator">Administrador</td><td>Login com usuário e senha em hash para acessar a administração.</td><td>—</td></tr>
+          <tr><td class="id">UC08</td><td class="nome">Gerenciar categorias</td><td class="ator">Administrador</td><td>Cadastra, edita e remove categorias do cardápio.</td><td>Exige login (UC07).</td></tr>
+          <tr><td class="id">UC09</td><td class="nome">Gerenciar produtos</td><td class="ator">Administrador</td><td>Cadastra, edita, remove e marca disponibilidade dos produtos.</td><td>Exige login (UC07).</td></tr>
+          <tr><td class="id">UC10</td><td class="nome">Gerenciar tamanhos</td><td class="ator">Administrador</td><td>Cadastra, edita e remove os tamanhos de pizza e seus adicionais.</td><td>Exige login (UC07).</td></tr>
+          <tr><td class="id">UC11</td><td class="nome">Listar pedidos</td><td class="ator">Administrador</td><td>Lista os pedidos recebidos, com filtro por status.</td><td>Exige login (UC07).</td></tr>
+          <tr><td class="id">UC12</td><td class="nome">Atualizar status do pedido</td><td class="ator">Administrador</td><td>Avança o pedido pelos status recebido → em preparo → saiu para entrega → entregue, ou cancela.</td><td>Exige login; bloqueado se já entregue ou cancelado.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Entregas 3 e 4 do trabalho da Pizzaria Fornatta. A modelagem aqui descrita é a base para a implementação em Flask, SQLAlchemy e PostgreSQL.
+  </footer>
+
+</div>
