@@ -1,0 +1,20 @@
+{% extends "admin/base_admin.html" %}
+
+{% block titulo %}Tamanho — Administração{% endblock %}
+
+{% block admin_conteudo %}
+<h1>{{ "Editar tamanho" if tamanho else "Novo tamanho" }}</h1>
+
+<form method="post">
+    <label for="nome">Nome</label>
+    <input type="text" name="nome" id="nome" value="{{ tamanho.nome if tamanho else '' }}" required>
+
+    <label for="preco_adicional">Preço adicional</label>
+    <input type="number" step="0.01" name="preco_adicional" id="preco_adicional" value="{{ tamanho.preco_adicional if tamanho else '0' }}" required>
+
+    <label for="ordem">Ordem de exibição</label>
+    <input type="number" name="ordem" id="ordem" value="{{ tamanho.ordem if tamanho else '0' }}">
+
+    <button type="submit">Salvar</button>
+</form>
+{% endblock %}

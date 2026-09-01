@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+<div class="admin-layout">
+    <nav class="admin-menu">
+        <a href="{{ url_for('admin.listar_pedidos') }}">Pedidos</a>
+        <a href="{{ url_for('admin.listar_mesas') }}">Mesas</a>
+        <a href="{{ url_for('admin.listar_produtos') }}">Produtos</a>
+        <a href="{{ url_for('admin.listar_categorias') }}">Categorias</a>
+        <a href="{{ url_for('admin.listar_tamanhos') }}">Tamanhos</a>
+        <a href="{{ url_for('admin.logout') }}">Sair</a>
+    </nav>
+    <div class="admin-conteudo">
+        {% block admin_conteudo %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

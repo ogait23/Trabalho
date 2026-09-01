@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block titulo %}Cardápio — Pizzaria Fornatta{% endblock %}
+
+{% block conteudo %}
+<h1>Cardápio</h1>
+
+{% if not categorias_com_produtos %}
+<p>Nenhum produto disponível no momento.</p>
+{% endif %}
+
+{% for categoria, produtos in categorias_com_produtos %}
+<section class="categoria">
+    <h2>{{ categoria.nome }}</h2>
+    <div class="grade-produtos">
+        {% for produto in produtos %}
+        <a class="cartao-produto" href="{{ url_for('loja.produto_detalhe', produto_id=produto.id) }}">
+            <h3>{{ produto.nome }}</h3>
+            <p>{{ produto.descricao }}</p>
+            <span class="preco">R$ {{ "%.2f"|format(produto.preco) }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "admin/base_admin.html" %}
+
+{% block titulo %}Pedido {{ pedido.id }}{% endblock %}
+
+{% block admin_conteudo %}
+<h1>Pedido {{ pedido.id }}</h1>
+
+<p>Tipo: {{ pedido.tipo|rotulo_tipo_pedido }}</p>
+{% if pedido.eh_mesa %}
+<p>Mesa: {{ pedido.mesa.numero if pedido.mesa else "-" }}</p>
+<p>Garçom: {{ pedido.garcom.nome if pedido.garcom else "-" }}</p>
+{% else %}
+<p>Cliente: {{ pedido.cliente.nome if pedido.cliente else "-" }}</p>
+<p>Telefone: {{ pedido.cliente.telefone if pedido.cliente else "-" }}</p>
+<p>Endereço: {{ pedido.cliente.endereco_entrega if pedido.cliente else "-" }}</p>
+{% endif %}
+<p>Status atual: <strong>{{ pedido.status|rotulo_status }}</strong></p>
+
+<h2>Itens</h2>
+<table class="tabela">
+    <thead>
+        <tr><th>Produto</th><th>Tamanho</th><th>Qtd.</th><th>Preço unit.</th><th>Subtotal</th><th></th></tr>
+    </thead>
+    <tbody>
+        {% for item in pedido.itens %}
+        <tr>
+            <td>{{ item.produto.nome }}{% if item.segundo_sabor %} + {{ item.segundo_sabor.nome }}{% endif %}</td>
+            <td>{{ item.tamanho.nome if item.tamanho else "-" }}</td>
+            <td>{{ item.quantidade }}</td>
+            <td>R$ {{ "%.2f"|format(item.preco_unitario) }}</td>
+            <td>R$ {{ "%.2f"|format(item.subtotal) }}</td>
+            <td>
+                {% if not pedido.esta_bloqueado %}
+                <form method="post" action="{{ url_for('admin.remover_item_pedido', pedido_id=pedido.id, item_id=item.id) }}">
+                    <button type="submit">Remover</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p>Taxa de entrega: R$ {{ "%.2f"|format(pedido.taxa_entrega) }}</p>
+<p class="total">Total: R$ {{ "%.2f"|format(pedido.total) }}</p>
+
+{% if not pedido.esta_bloqueado %}
+<h2>Adicionar item</h2>
+<form method="post" action="{{ url_for('admin.adicionar_item_pedido', pedido_id=pedido.id) }}">
+    <label for="produto_id">Produto</label>
+    <select name="produto_id" id="produto_id" required>
+        {% for produto in produtos %}
+        <option value="{{ produto.id }}">{{ produto.nome }} — R$ {{ "%.2f"|format(produto.preco) }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="tamanho_id">Tamanho (só pizza)</label>
+    <select name="tamanho_id" id="tamanho_id">
+        <option value="">-</option>
+        {% for tamanho in tamanhos %}
+        <option value="{{ tamanho.id }}">{{ tamanho.nome }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="segundo_sabor_id">Segundo sabor (só pizza)</label>
+    <select name="segundo_sabor_id" id="segundo_sabor_id">
+        <option value="">-</option>
+        {% for produto in produtos %}
+        <option value="{{ produto.id }}">{{ produto.nome }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="quantidade">Quantidade</label>
+    <input type="number" name="quantidade" id="quantidade" value="1" min="1">
+
+    <button type="submit">Adicionar</button>
+</form>
+
+<h2>Atualizar status</h2>
+<form method="post" action="{{ url_for('admin.atualizar_status_pedido', pedido_id=pedido.id) }}" class="form-linha">
+    <select name="status">
+        {% for valor, rotulo in status_pedido %}
+        <option value="{{ valor }}" {% if valor == pedido.status %}selected{% endif %}>{{ rotulo }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Salvar status</button>
+</form>
+
+{% if pedido.eh_mesa %}
+<h2>Fechar conta</h2>
+<form method="post" action="{{ url_for('admin.fechar_conta', pedido_id=pedido.id) }}" class="form-linha">
+    <select name="forma_pagamento" required>
+        {% for valor, rotulo in formas_pagamento %}
+        <option value="{{ valor }}">{{ rotulo }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Fechar conta e registrar pagamento</button>
+</form>
+{% endif %}
+
+{% else %}
+<p>Este pedido está {{ pedido.status|rotulo_status|lower }} e não pode mais ser alterado.</p>
+{% endif %}
+
+{% if pedido.pagamento %}
+<h2>Pagamento</h2>
+<p>Forma: {{ pedido.pagamento.forma|rotulo_pagamento }}</p>
+<p>Valor: R$ {{ "%.2f"|format(pedido.pagamento.valor) }}</p>
+{% endif %}
+{% endblock %}

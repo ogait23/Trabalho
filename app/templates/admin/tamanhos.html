@@ -1,0 +1,27 @@
+{% extends "admin/base_admin.html" %}
+
+{% block titulo %}Tamanhos — Administração{% endblock %}
+
+{% block admin_conteudo %}
+<h1>Tamanhos</h1>
+<a class="botao" href="{{ url_for('admin.novo_tamanho') }}">Novo tamanho</a>
+
+<table class="tabela">
+    <thead><tr><th>Nome</th><th>Preço adicional</th><th>Ordem</th><th></th></tr></thead>
+    <tbody>
+        {% for tamanho in tamanhos %}
+        <tr>
+            <td>{{ tamanho.nome }}</td>
+            <td>R$ {{ "%.2f"|format(tamanho.preco_adicional) }}</td>
+            <td>{{ tamanho.ordem }}</td>
+            <td>
+                <a href="{{ url_for('admin.editar_tamanho', tamanho_id=tamanho.id) }}">Editar</a>
+                <form method="post" action="{{ url_for('admin.excluir_tamanho', tamanho_id=tamanho.id) }}" class="form-linha">
+                    <button type="submit">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block titulo %}Finalizar pedido — Pizzaria Fornatta{% endblock %}
+
+{% block conteudo %}
+<h1>Finalizar pedido</h1>
+
+<h2>Resumo</h2>
+<ul>
+    {% for linha in linhas %}
+    <li>
+        {{ linha.quantidade }}x {{ linha.produto.nome }}
+        {% if linha.segundo_sabor %} + {{ linha.segundo_sabor.nome }}{% endif %}
+        {% if linha.tamanho %} ({{ linha.tamanho.nome }}){% endif %}
+        — R$ {{ "%.2f"|format(linha.subtotal) }}
+    </li>
+    {% endfor %}
+</ul>
+<p>Itens: R$ {{ "%.2f"|format(total_itens) }}</p>
+<p>Taxa de entrega: R$ {{ "%.2f"|format(taxa_entrega) }}</p>
+<p class="total">Total: R$ {{ "%.2f"|format(total_itens + taxa_entrega) }}</p>
+
+<form method="post" action="{{ url_for('loja.finalizar') }}">
+    <label for="nome">Nome</label>
+    <input type="text" name="nome" id="nome" required>
+
+    <label for="telefone">Telefone</label>
+    <input type="text" name="telefone" id="telefone" required>
+
+    <label for="endereco_entrega">Endereço de entrega</label>
+    <input type="text" name="endereco_entrega" id="endereco_entrega" required>
+
+    <label for="forma_pagamento">Forma de pagamento</label>
+    <select name="forma_pagamento" id="forma_pagamento" required>
+        {% for valor, rotulo in formas_pagamento %}
+        <option value="{{ valor }}">{{ rotulo }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Confirmar pedido</button>
+</form>
+{% endblock %}

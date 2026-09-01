@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block titulo %}Pizzaria Fornatta{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
+</head>
+<body>
+<header class="cabecalho">
+    <a class="marca" href="{{ url_for('loja.cardapio') }}">Pizzaria Fornatta</a>
+    <nav class="navegacao">
+        <a href="{{ url_for('loja.cardapio') }}">Cardápio</a>
+        <a href="{{ url_for('loja.carrinho') }}">Carrinho</a>
+        <a href="{{ url_for('admin.painel') }}">Administração</a>
+    </nav>
+</header>
+
+<main class="conteudo">
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+        <ul class="mensagens">
+            {% for categoria, texto in mensagens %}
+            <li class="mensagem mensagem-{{ categoria }}">{{ texto }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+
+    {% block conteudo %}{% endblock %}
+</main>
+
+{% block script %}{% endblock %}
+</body>
+</html>

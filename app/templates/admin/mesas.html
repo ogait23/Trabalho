@@ -1,0 +1,37 @@
+{% extends "admin/base_admin.html" %}
+
+{% block titulo %}Mesas — Administração{% endblock %}
+
+{% block admin_conteudo %}
+<h1>Mesas</h1>
+
+<form method="post" action="{{ url_for('admin.nova_mesa') }}" class="form-linha">
+    <label for="numero">Número da nova mesa</label>
+    <input type="number" name="numero" id="numero" min="1" required>
+    <button type="submit">Cadastrar</button>
+</form>
+
+<table class="tabela">
+    <thead>
+        <tr><th>Número</th><th>Status</th><th>Alterar</th></tr>
+    </thead>
+    <tbody>
+        {% for mesa in mesas %}
+        <tr>
+            <td>{{ mesa.numero }}</td>
+            <td>{{ mesa.status|rotulo_mesa }}</td>
+            <td>
+                <form method="post" action="{{ url_for('admin.atualizar_status_mesa', mesa_id=mesa.id) }}" class="form-linha">
+                    <select name="status">
+                        {% for valor, rotulo in status_mesa %}
+                        <option value="{{ valor }}" {% if valor == mesa.status %}selected{% endif %}>{{ rotulo }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Salvar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
