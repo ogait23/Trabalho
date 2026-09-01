@@ -1,4 +1,10 @@
-from pizzaria.modelos import Caixa, Categoria, Cozinha, Estoque, Garcom, Mesa, Produto
+from pizzaria.caixa import Caixa
+from pizzaria.categoria import Categoria
+from pizzaria.cozinha import Cozinha
+from pizzaria.estoque import Estoque
+from pizzaria.garcom import Garcom
+from pizzaria.mesa import Mesa
+from pizzaria.produto import Produto
 
 
 class BaseDados:

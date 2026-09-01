@@ -1,5 +1,5 @@
 from dados_iniciais import criar_produto, montar_dados_iniciais
-from pizzaria.modelos import Pedido
+from pizzaria.pedido import Pedido
 
 STATUS_FINALIZADOS = ("entregue", "cancelado")
 
