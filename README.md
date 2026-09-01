@@ -66,3 +66,7 @@ de rodar. `ADMIN_SENHA_HASH` recebe a saída do script de geração de hash.
 
 Depois de rodar `flask run`, o site fica em `http://localhost:5000/` e a
 administração em `http://localhost:5000/admin/login`.
+
+Frontend (HTML/CSS): o CSS atual é simples e sem framework; refinar o
+design do site é um plano futuro, depois que o fluxo funcional estiver
+validado.
