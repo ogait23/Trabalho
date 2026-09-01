@@ -61,3 +61,5 @@ flask run
 
 Ajuste `DATABASE_URL`, `ADMIN_USUARIO` e `ADMIN_SENHA_HASH` no `.env` antes de
 rodar. `ADMIN_SENHA_HASH` recebe a saída do script de geração de hash.
+
+Parte da frente= HTML,CSS: ja que estamos trabalhando em um Site de entregas de pizzaria é importante, nós iremos trabalhar com HTML e CSS para melhorar o design do site em planos futuros para melhorar o desenvolvimento do site e sua rapidez.
