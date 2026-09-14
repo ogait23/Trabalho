@@ -9,19 +9,34 @@
 <body>
 
 <header>
-    <h1>Pizzaria Fornatta</h1>
+    <div class="cabecalho-conteudo">
+        <h1>Pizzaria Fornatta</h1>
+        <p class="subtitulo">Painel de atendimento</p>
+    </div>
 </header>
 
 <main>
-    <section id="secao-mesas">
+    <nav class="menu-secoes">
+        <a href="#secao-mesas">Mesas</a>
+        <a href="#secao-pedido">Pedido</a>
+        <a href="#secao-cozinha">Cozinha</a>
+        <a href="#secao-caixa">Caixa</a>
+        <a href="#secao-estoque">Estoque</a>
+        <a href="#secao-cadastro-produto">Novo produto</a>
+    </nav>
+
+    <section id="secao-mesas" class="cartao-secao">
         <h2>Mesas</h2>
         <div id="lista-mesas" class="grade"></div>
     </section>
 
-    <section id="secao-pedido" hidden>
+    <section id="secao-pedido" class="cartao-secao" hidden>
         <h2>Pedido <span id="pedido-numero"></span> — Mesa <span id="pedido-mesa"></span></h2>
-        <p>Status: <span id="pedido-status"></span></p>
-        <ul id="lista-itens"></ul>
+        <p class="info-pedido">
+            <span id="pedido-status-badge" class="selo"></span>
+            <span id="pedido-cliente-linha" class="info-cliente"></span>
+        </p>
+        <ul id="lista-itens" class="lista-itens"></ul>
         <p class="total">Total: R$ <span id="pedido-total">0.00</span></p>
 
         <form id="form-item">
@@ -30,7 +45,7 @@
             <button type="submit">Adicionar item</button>
         </form>
 
-        <button id="botao-enviar-cozinha">Enviar para a cozinha</button>
+        <button id="botao-enviar-cozinha" class="botao-destaque">Enviar para a cozinha</button>
 
         <form id="form-fechar-conta">
             <select id="select-pagamento">
@@ -42,20 +57,33 @@
         </form>
     </section>
 
-    <section id="secao-cozinha">
+    <section id="secao-cozinha" class="cartao-secao">
         <h2>Cozinha</h2>
-        <div id="lista-cozinha"></div>
+        <div id="lista-cozinha" class="lista-cozinha"></div>
     </section>
 
-    <section id="secao-caixa">
+    <section id="secao-caixa" class="cartao-secao">
         <h2>Caixa</h2>
         <p class="total">Total recebido: R$ <span id="caixa-total">0.00</span></p>
         <button id="botao-fechar-caixa">Fechar caixa</button>
     </section>
 
-    <section id="secao-estoque">
+    <section id="secao-estoque" class="cartao-secao">
         <h2>Estoque</h2>
-        <div id="lista-estoque"></div>
+        <div id="lista-estoque" class="lista-estoque"></div>
+    </section>
+
+    <section id="secao-cadastro-produto" class="cartao-secao">
+        <h2>Cadastrar novo produto</h2>
+        <form id="form-novo-produto" class="formulario-produto">
+            <input type="text" id="produto-nome" placeholder="Nome do produto" required>
+            <select id="produto-categoria"></select>
+            <input type="number" id="produto-preco" placeholder="Preço (R$)" min="0.01" step="0.01" required>
+            <input type="number" id="produto-estoque" placeholder="Qtd. em estoque" min="0" value="0">
+            <input type="number" id="produto-estoque-minimo" placeholder="Estoque mínimo" min="0" value="0">
+            <button type="submit">Cadastrar produto</button>
+        </form>
+        <p id="mensagem-produto" class="mensagem" hidden></p>
     </section>
 </main>
 

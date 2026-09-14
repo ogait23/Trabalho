@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, send_from_directory
 
-from dados_iniciais import montar_dados_iniciais
+from dados_iniciais import criar_produto, montar_dados_iniciais
 from pizzaria.pedido import Pedido, STATUS_FINALIZADOS
 
 app = Flask(__name__, static_folder=None)
@@ -9,15 +9,21 @@ dados = montar_dados_iniciais()
 
 def mesa_para_dict(mesa):
     pedido_aberto = None
+    cliente_nome = None
+    garcom_nome = None
     for pedido in dados.pedidos:
         if pedido.mesa is mesa and pedido.status not in STATUS_FINALIZADOS:
             pedido_aberto = pedido.numero
+            cliente_nome = pedido.nomeCliente
+            garcom_nome = pedido.garcom.nome if pedido.garcom else None
             break
     return {
         "numero": mesa.numero,
         "capacidade": mesa.capacidade,
         "status": mesa.status,
         "pedidoAberto": pedido_aberto,
+        "clienteNome": cliente_nome,
+        "garcomNome": garcom_nome,
     }
 
 
@@ -39,6 +45,8 @@ def pedido_para_dict(pedido):
         "mesa": pedido.mesa.numero,
         "status": pedido.status,
         "valorTotal": pedido.valorTotal,
+        "nomeCliente": pedido.nomeCliente,
+        "garcom": pedido.garcom.nome if pedido.garcom else None,
         "itens": [item_para_dict(item) for item in pedido.itens],
     }
 
@@ -80,6 +88,13 @@ def encontrar_garcom(nome):
     return None
 
 
+def encontrar_categoria(nome):
+    for categoria in dados.categorias:
+        if categoria.nome == nome:
+            return categoria
+    return None
+
+
 @app.route("/")
 def pagina_inicial():
     return send_from_directory("frontend", "index.html")
@@ -95,9 +110,49 @@ def listar_mesas():
     return jsonify([mesa_para_dict(mesa) for mesa in dados.mesas])
 
 
-@app.route("/api/produtos")
-def listar_produtos():
-    return jsonify([produto_para_dict(produto) for produto in dados.produtos])
+@app.route("/api/produtos", methods=["GET", "POST"])
+def produtos():
+    if request.method == "GET":
+        return jsonify([produto_para_dict(produto) for produto in dados.produtos])
+
+    corpo = request.get_json(force=True)
+    nome = (corpo.get("nome") or "").strip()
+    categoria_nome = corpo.get("categoria", "")
+    quantidade_estoque = corpo.get("quantidadeEstoque", 0)
+    quantidade_minima = corpo.get("quantidadeMinima", 0)
+
+    if not nome:
+        return jsonify({"erro": "Informe o nome do produto."}), 400
+
+    if encontrar_produto(nome) is not None:
+        return jsonify({"erro": "Já existe um produto com esse nome."}), 400
+
+    categoria = encontrar_categoria(categoria_nome)
+    if categoria is None:
+        return jsonify({"erro": "Categoria não encontrada."}), 400
+
+    try:
+        preco = float(corpo.get("preco"))
+        if preco <= 0:
+            raise ValueError
+    except (TypeError, ValueError):
+        return jsonify({"erro": "Informe um preço válido."}), 400
+
+    try:
+        quantidade_estoque = int(quantidade_estoque)
+        quantidade_minima = int(quantidade_minima)
+        if quantidade_estoque < 0 or quantidade_minima < 0:
+            raise ValueError
+    except (TypeError, ValueError):
+        return jsonify({"erro": "Informe quantidades válidas."}), 400
+
+    produto = criar_produto(dados, nome, preco, categoria, quantidade_estoque, quantidade_minima)
+    return jsonify(produto_para_dict(produto)), 201
+
+
+@app.route("/api/categorias")
+def listar_categorias():
+    return jsonify([categoria.nome for categoria in dados.categorias])
 
 
 @app.route("/api/garcons")
@@ -135,6 +190,10 @@ def abrir_pedido(numero):
         return jsonify({"erro": "Mesa não encontrada."}), 404
 
     corpo = request.get_json(force=True)
+    nome_cliente = (corpo.get("nomeCliente") or "").strip()
+    if not nome_cliente:
+        return jsonify({"erro": "Informe o nome do cliente."}), 400
+
     garcom = encontrar_garcom(corpo.get("garcom", ""))
     if garcom is None:
         return jsonify({"erro": "Garçom não encontrado."}), 400
@@ -146,7 +205,7 @@ def abrir_pedido(numero):
 
     garcom.atenderMesa(mesa)
 
-    pedido = Pedido(len(dados.pedidos) + 1, mesa)
+    pedido = Pedido(len(dados.pedidos) + 1, mesa, nome_cliente, garcom)
     pedido.lancarPedido()
     dados.pedidos.append(pedido)
 

@@ -4,9 +4,11 @@ STATUS_FINALIZADOS = ("entregue", "cancelado")
 
 
 class Pedido:
-    def __init__(self, numero, mesa):
+    def __init__(self, numero, mesa, nomeCliente=None, garcom=None):
         self.numero = numero
         self.mesa = mesa
+        self.nomeCliente = nomeCliente
+        self.garcom = garcom
         self.itens = []
         self.status = None
         self.valorTotal = 0

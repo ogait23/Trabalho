@@ -14,6 +14,10 @@ function apiObterProdutos() {
     return requisitar("/produtos");
 }
 
+function apiObterCategorias() {
+    return requisitar("/categorias");
+}
+
 function apiObterGarcons() {
     return requisitar("/garcons");
 }
@@ -34,11 +38,11 @@ function apiObterPedido(numero) {
     return requisitar("/pedidos/" + numero);
 }
 
-function apiAbrirPedido(numeroMesa, garcom) {
+function apiAbrirPedido(numeroMesa, garcom, nomeCliente) {
     return requisitar("/mesas/" + numeroMesa + "/pedido", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ garcom: garcom }),
+        body: JSON.stringify({ garcom: garcom, nomeCliente: nomeCliente }),
     });
 }
 
@@ -70,6 +74,14 @@ function apiFecharCaixa() {
     return requisitar("/caixa/fechar", { method: "POST" });
 }
 
+function apiCadastrarProduto(dadosProduto) {
+    return requisitar("/produtos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dadosProduto),
+    });
+}
+
 async function renderMesas() {
     const mesas = await apiObterMesas();
     const garcons = await apiObterGarcons();
@@ -80,16 +92,38 @@ async function renderMesas() {
         const cartao = document.createElement("div");
         cartao.className = "cartao-mesa";
 
-        const titulo = document.createElement("strong");
-        titulo.textContent = "Mesa " + mesa.numero + " (" + mesa.capacidade + " lugares) — " + mesa.status;
+        const titulo = document.createElement("div");
+        titulo.className = "titulo-mesa";
+
+        const nomeMesa = document.createElement("span");
+        nomeMesa.textContent = "Mesa " + mesa.numero + " · " + mesa.capacidade + " lugares";
+
+        const selo = document.createElement("span");
+        selo.className = "selo selo-" + mesa.status;
+        selo.textContent = mesa.status === "ocupada" ? "Ocupada" : "Livre";
+
+        titulo.appendChild(nomeMesa);
+        titulo.appendChild(selo);
         cartao.appendChild(titulo);
 
         if (mesa.status === "ocupada") {
+            const info = document.createElement("p");
+            info.className = "info-mesa-extra";
+            info.innerHTML = "Cliente: <strong>" + mesa.clienteNome + "</strong><br>Garçom: <strong>" + mesa.garcomNome + "</strong>";
+            cartao.appendChild(info);
+
             const botao = document.createElement("button");
             botao.textContent = "Ver pedido";
             botao.addEventListener("click", () => abrirPedidoNaTela(mesa.pedidoAberto));
             cartao.appendChild(botao);
         } else {
+            const form = document.createElement("form");
+            form.className = "formulario-mesa";
+
+            const inputCliente = document.createElement("input");
+            inputCliente.type = "text";
+            inputCliente.placeholder = "Nome do cliente";
+
             const select = document.createElement("select");
             garcons.forEach((nome) => {
                 const opcao = document.createElement("option");
@@ -99,9 +133,20 @@ async function renderMesas() {
             });
 
             const botao = document.createElement("button");
-            botao.textContent = "Abrir pedido";
-            botao.addEventListener("click", async () => {
-                const pedido = await apiAbrirPedido(mesa.numero, select.value);
+            botao.type = "submit";
+            botao.className = "botao-garcom";
+            botao.textContent = "Mandar garçom";
+
+            form.addEventListener("submit", async (evento) => {
+                evento.preventDefault();
+
+                const nomeCliente = inputCliente.value.trim();
+                if (!nomeCliente) {
+                    alert("Informe o nome do cliente.");
+                    return;
+                }
+
+                const pedido = await apiAbrirPedido(mesa.numero, select.value, nomeCliente);
                 if (pedido.erro) {
                     alert(pedido.erro);
                     return;
@@ -110,8 +155,10 @@ async function renderMesas() {
                 abrirPedidoNaTela(pedido.numero);
             });
 
-            cartao.appendChild(select);
-            cartao.appendChild(botao);
+            form.appendChild(inputCliente);
+            form.appendChild(select);
+            form.appendChild(botao);
+            cartao.appendChild(form);
         }
 
         container.appendChild(cartao);
@@ -121,6 +168,7 @@ async function renderMesas() {
 function abrirPedidoNaTela(numero) {
     pedidoAtualNumero = numero;
     document.getElementById("secao-pedido").hidden = false;
+    document.getElementById("secao-pedido").scrollIntoView({ behavior: "smooth" });
     renderPedido();
 }
 
@@ -133,8 +181,14 @@ async function renderPedido() {
 
     document.getElementById("pedido-numero").textContent = pedido.numero;
     document.getElementById("pedido-mesa").textContent = pedido.mesa;
-    document.getElementById("pedido-status").textContent = pedido.status;
     document.getElementById("pedido-total").textContent = pedido.valorTotal.toFixed(2);
+
+    const badge = document.getElementById("pedido-status-badge");
+    badge.className = "selo selo-" + pedido.status;
+    badge.textContent = pedido.status;
+
+    document.getElementById("pedido-cliente-linha").innerHTML =
+        "Cliente: <strong>" + pedido.nomeCliente + "</strong> &middot; Garçom: <strong>" + pedido.garcom + "</strong>";
 
     const lista = document.getElementById("lista-itens");
     lista.innerHTML = "";
@@ -162,14 +216,36 @@ async function popularSelectProdutos() {
     });
 }
 
+async function popularSelectCategorias() {
+    const categorias = await apiObterCategorias();
+    const select = document.getElementById("produto-categoria");
+    select.innerHTML = "";
+    categorias.forEach((nome) => {
+        const opcao = document.createElement("option");
+        opcao.value = nome;
+        opcao.textContent = nome;
+        select.appendChild(opcao);
+    });
+}
+
 async function renderCozinha() {
     const pendentes = await apiObterCozinha();
     const container = document.getElementById("lista-cozinha");
     container.innerHTML = "";
 
+    if (pendentes.length === 0) {
+        const vazio = document.createElement("p");
+        vazio.className = "vazio";
+        vazio.textContent = "Nenhum pedido na fila.";
+        container.appendChild(vazio);
+        return;
+    }
+
     pendentes.forEach((pedido) => {
         const linha = document.createElement("div");
-        linha.textContent = "Pedido " + pedido.numero + " — mesa " + pedido.mesa + " ";
+
+        const texto = document.createElement("span");
+        texto.textContent = "Pedido " + pedido.numero + " — mesa " + pedido.mesa;
 
         const botao = document.createElement("button");
         botao.textContent = "Preparar";
@@ -179,6 +255,7 @@ async function renderCozinha() {
             await renderPedido();
         });
 
+        linha.appendChild(texto);
         linha.appendChild(botao);
         container.appendChild(linha);
     });
@@ -196,10 +273,24 @@ async function renderEstoque() {
 
     estoques.forEach((estoque) => {
         const linha = document.createElement("div");
-        const aviso = estoque.baixo ? " (ESTOQUE BAIXO)" : "";
-        linha.textContent = estoque.produto + ": " + estoque.quantidade + " unidades" + aviso;
+
+        const texto = document.createElement("span");
+        texto.textContent = estoque.produto + ": " + estoque.quantidade + " unidades";
+        if (estoque.baixo) {
+            texto.textContent += " (estoque baixo)";
+            texto.className = "item-estoque-baixo";
+        }
+
+        linha.appendChild(texto);
         container.appendChild(linha);
     });
+}
+
+function exibirMensagemProduto(texto, sucesso) {
+    const mensagem = document.getElementById("mensagem-produto");
+    mensagem.textContent = texto;
+    mensagem.className = "mensagem " + (sucesso ? "mensagem-sucesso" : "mensagem-erro");
+    mensagem.hidden = false;
 }
 
 document.getElementById("form-item").addEventListener("submit", async (evento) => {
@@ -245,8 +336,33 @@ document.getElementById("botao-fechar-caixa").addEventListener("click", async ()
     await renderCaixa();
 });
 
+document.getElementById("form-novo-produto").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+
+    const dadosProduto = {
+        nome: document.getElementById("produto-nome").value.trim(),
+        categoria: document.getElementById("produto-categoria").value,
+        preco: parseFloat(document.getElementById("produto-preco").value),
+        quantidadeEstoque: parseInt(document.getElementById("produto-estoque").value, 10) || 0,
+        quantidadeMinima: parseInt(document.getElementById("produto-estoque-minimo").value, 10) || 0,
+    };
+
+    const resultado = await apiCadastrarProduto(dadosProduto);
+    if (resultado.erro) {
+        exibirMensagemProduto(resultado.erro, false);
+        return;
+    }
+
+    exibirMensagemProduto("Produto \"" + resultado.nome + "\" cadastrado com sucesso.", true);
+    document.getElementById("form-novo-produto").reset();
+
+    await popularSelectProdutos();
+    await renderEstoque();
+});
+
 async function iniciar() {
     await popularSelectProdutos();
+    await popularSelectCategorias();
     await renderMesas();
     await renderCozinha();
     await renderCaixa();
