@@ -33,13 +33,3 @@ Depois abra `http://localhost:5000` no navegador.
 - `app.py` — servidor Flask: serve o frontend e expõe a API usada por ele
 - `frontend/` — HTML, CSS e JavaScript puro (sem framework), consome a API
   do `app.py`
-- `main.py` — versão alternativa em terminal, sem Flask, usando as mesmas
-  classes
-
-## Versão alternativa (terminal)
-
-Sem instalar nada, sem navegador:
-
-```
-python main.py
-```
