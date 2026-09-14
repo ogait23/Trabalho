@@ -1,206 +1,82 @@
-class Mesa {
-    constructor(numero, capacidade, status) {
-        this.numero = numero;
-        this.capacidade = capacidade;
-        this.status = status || "livre";
-    }
+const BASE = "/api";
+let pedidoAtualNumero = null;
 
-    ocupar() {
-        if (this.status === "ocupada") {
-            throw new Error("Mesa " + this.numero + " já está ocupada.");
-        }
-        this.status = "ocupada";
-    }
-
-    liberar() {
-        this.status = "livre";
-    }
+async function requisitar(caminho, opcoes) {
+    const resposta = await fetch(BASE + caminho, opcoes);
+    return resposta.json();
 }
 
-class Categoria {
-    constructor(nome) {
-        this.nome = nome;
-        this.produtos = [];
-    }
-
-    listarProdutos() {
-        return this.produtos;
-    }
+function apiObterMesas() {
+    return requisitar("/mesas");
 }
 
-class Produto {
-    constructor(nome, preco, categoria) {
-        this.nome = nome;
-        this.preco = preco;
-        this.categoria = categoria;
-        categoria.produtos.push(this);
-    }
-
-    atualizarPreco(novoPreco) {
-        this.preco = novoPreco;
-    }
+function apiObterProdutos() {
+    return requisitar("/produtos");
 }
 
-class Garcom {
-    constructor(nome) {
-        this.nome = nome;
-        this.mesasAtendidas = [];
-    }
-
-    atenderMesa(mesa) {
-        this.mesasAtendidas.push(mesa);
-    }
+function apiObterGarcons() {
+    return requisitar("/garcons");
 }
 
-class Pagamento {
-    constructor(forma, valor, pedido) {
-        this.forma = forma;
-        this.valor = valor;
-        this.pedido = pedido;
-    }
-
-    registrarPagamento(caixa) {
-        caixa.totalRecebido += this.valor;
-    }
+function apiObterEstoque() {
+    return requisitar("/estoque");
 }
 
-const STATUS_FINALIZADOS = ["entregue", "cancelado"];
-
-class Pedido {
-    constructor(numero, mesa) {
-        this.numero = numero;
-        this.mesa = mesa;
-        this.itens = [];
-        this.status = null;
-        this.valorTotal = 0;
-        this.pagamento = null;
-    }
-
-    lancarPedido() {
-        this.status = "recebido";
-    }
-
-    adicionarItem(produto, quantidade) {
-        if (STATUS_FINALIZADOS.includes(this.status)) {
-            throw new Error("Pedido " + this.numero + " já foi finalizado.");
-        }
-        this.itens.push({ produto: produto, quantidade: quantidade, precoUnitario: produto.preco });
-        this.valorTotal = this.itens.reduce((soma, item) => soma + item.precoUnitario * item.quantidade, 0);
-    }
-
-    fecharConta(formaPagamento, caixa) {
-        if (STATUS_FINALIZADOS.includes(this.status)) {
-            throw new Error("Pedido " + this.numero + " já foi finalizado.");
-        }
-        this.status = "entregue";
-        this.mesa.liberar();
-        const pagamento = new Pagamento(formaPagamento, this.valorTotal, this);
-        pagamento.registrarPagamento(caixa);
-        this.pagamento = pagamento;
-        return pagamento;
-    }
+function apiObterCozinha() {
+    return requisitar("/cozinha");
 }
 
-class Cozinha {
-    constructor() {
-        this.pedidosPendentes = [];
-    }
-
-    prepararPedido(pedido) {
-        const indice = this.pedidosPendentes.indexOf(pedido);
-        if (indice === -1) {
-            throw new Error("Pedido " + pedido.numero + " não está na fila da cozinha.");
-        }
-        this.pedidosPendentes.splice(indice, 1);
-        pedido.status = "pronto";
-    }
+function apiObterCaixa() {
+    return requisitar("/caixa");
 }
 
-class Caixa {
-    constructor() {
-        this.totalRecebido = 0;
-    }
-
-    fecharCaixa() {
-        const total = this.totalRecebido;
-        this.totalRecebido = 0;
-        return total;
-    }
+function apiObterPedido(numero) {
+    return requisitar("/pedidos/" + numero);
 }
 
-class Estoque {
-    constructor(produto, quantidade, quantidadeMinima) {
-        this.produto = produto;
-        this.quantidade = quantidade;
-        this.quantidadeMinima = quantidadeMinima;
-    }
-
-    atualizarQuantidade(variacao) {
-        this.quantidade += variacao;
-    }
-
-    verificarEstoqueBaixo() {
-        return this.quantidade <= this.quantidadeMinima;
-    }
+function apiAbrirPedido(numeroMesa, garcom) {
+    return requisitar("/mesas/" + numeroMesa + "/pedido", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ garcom: garcom }),
+    });
 }
 
-function criarProduto(dados, nome, preco, categoria, quantidadeEstoque, quantidadeMinima) {
-    const produto = new Produto(nome, preco, categoria);
-    dados.produtos.push(produto);
-    dados.estoques.push(new Estoque(produto, quantidadeEstoque, quantidadeMinima));
-    return produto;
+function apiAdicionarItem(numeroPedido, produto, quantidade) {
+    return requisitar("/pedidos/" + numeroPedido + "/itens", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ produto: produto, quantidade: quantidade }),
+    });
 }
 
-function montarDadosIniciais() {
-    const dados = {
-        categorias: [],
-        produtos: [],
-        mesas: [],
-        garcons: [],
-        estoques: [],
-        pedidos: [],
-        cozinha: new Cozinha(),
-        caixa: new Caixa(),
-    };
-
-    const pizzaSalgada = new Categoria("Pizza Salgada");
-    const pizzaDoce = new Categoria("Pizza Doce");
-    const bebida = new Categoria("Bebida");
-    const porcao = new Categoria("Porção");
-    dados.categorias.push(pizzaSalgada, pizzaDoce, bebida, porcao);
-
-    criarProduto(dados, "Calabresa", 28.0, pizzaSalgada, 20, 5);
-    criarProduto(dados, "Quatro Queijos", 32.0, pizzaSalgada, 15, 5);
-    criarProduto(dados, "Frango com Catupiry", 30.0, pizzaSalgada, 15, 5);
-    criarProduto(dados, "Chocolate", 30.0, pizzaDoce, 10, 3);
-    criarProduto(dados, "Banana com Canela", 26.0, pizzaDoce, 10, 3);
-    criarProduto(dados, "Refrigerante 2L", 10.0, bebida, 30, 10);
-    criarProduto(dados, "Água Mineral", 5.0, bebida, 40, 10);
-    criarProduto(dados, "Cerveja Long Neck", 12.0, bebida, 24, 6);
-    criarProduto(dados, "Batata Frita", 22.0, porcao, 20, 5);
-    criarProduto(dados, "Calabresa Acebolada", 24.0, porcao, 20, 5);
-    criarProduto(dados, "Frango a Passarinho", 26.0, porcao, 15, 5);
-    criarProduto(dados, "Anéis de Cebola", 20.0, porcao, 15, 5);
-    criarProduto(dados, "Pão de Alho", 14.0, porcao, 25, 8);
-
-    for (let numero = 1; numero <= 6; numero++) {
-        dados.mesas.push(new Mesa(numero, 4));
-    }
-
-    dados.garcons.push(new Garcom("Carlos"));
-    dados.garcons.push(new Garcom("Fernanda"));
-
-    return dados;
+function apiEnviarParaCozinha(numeroPedido) {
+    return requisitar("/pedidos/" + numeroPedido + "/cozinha", { method: "POST" });
 }
 
-const dados = montarDadosIniciais();
-let pedidoAtual = null;
+function apiPrepararPedido(numeroPedido) {
+    return requisitar("/pedidos/" + numeroPedido + "/preparar", { method: "POST" });
+}
 
-function renderMesas() {
+function apiFecharConta(numeroPedido, formaPagamento) {
+    return requisitar("/pedidos/" + numeroPedido + "/fechar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ formaPagamento: formaPagamento }),
+    });
+}
+
+function apiFecharCaixa() {
+    return requisitar("/caixa/fechar", { method: "POST" });
+}
+
+async function renderMesas() {
+    const mesas = await apiObterMesas();
+    const garcons = await apiObterGarcons();
     const container = document.getElementById("lista-mesas");
     container.innerHTML = "";
 
-    dados.mesas.forEach((mesa) => {
+    mesas.forEach((mesa) => {
         const cartao = document.createElement("div");
         cartao.className = "cartao-mesa";
 
@@ -209,25 +85,29 @@ function renderMesas() {
         cartao.appendChild(titulo);
 
         if (mesa.status === "ocupada") {
-            const pedido = dados.pedidos.find((p) => p.mesa === mesa && !STATUS_FINALIZADOS.includes(p.status));
             const botao = document.createElement("button");
             botao.textContent = "Ver pedido";
-            botao.addEventListener("click", () => abrirPedidoNaTela(pedido));
+            botao.addEventListener("click", () => abrirPedidoNaTela(mesa.pedidoAberto));
             cartao.appendChild(botao);
         } else {
             const select = document.createElement("select");
-            dados.garcons.forEach((garcom) => {
+            garcons.forEach((nome) => {
                 const opcao = document.createElement("option");
-                opcao.value = garcom.nome;
-                opcao.textContent = garcom.nome;
+                opcao.value = nome;
+                opcao.textContent = nome;
                 select.appendChild(opcao);
             });
 
             const botao = document.createElement("button");
             botao.textContent = "Abrir pedido";
-            botao.addEventListener("click", () => {
-                const garcom = dados.garcons.find((g) => g.nome === select.value);
-                lancarPedido(mesa, garcom);
+            botao.addEventListener("click", async () => {
+                const pedido = await apiAbrirPedido(mesa.numero, select.value);
+                if (pedido.erro) {
+                    alert(pedido.erro);
+                    return;
+                }
+                await renderMesas();
+                abrirPedidoNaTela(pedido.numero);
             });
 
             cartao.appendChild(select);
@@ -238,52 +118,43 @@ function renderMesas() {
     });
 }
 
-function lancarPedido(mesa, garcom) {
-    mesa.ocupar();
-    garcom.atenderMesa(mesa);
-
-    const pedido = new Pedido(dados.pedidos.length + 1, mesa);
-    pedido.lancarPedido();
-    dados.pedidos.push(pedido);
-
-    renderMesas();
-    abrirPedidoNaTela(pedido);
-}
-
-function abrirPedidoNaTela(pedido) {
-    pedidoAtual = pedido;
+function abrirPedidoNaTela(numero) {
+    pedidoAtualNumero = numero;
     document.getElementById("secao-pedido").hidden = false;
     renderPedido();
 }
 
-function renderPedido() {
-    if (!pedidoAtual) {
+async function renderPedido() {
+    if (!pedidoAtualNumero) {
         return;
     }
 
-    document.getElementById("pedido-numero").textContent = pedidoAtual.numero;
-    document.getElementById("pedido-mesa").textContent = pedidoAtual.mesa.numero;
-    document.getElementById("pedido-status").textContent = pedidoAtual.status;
-    document.getElementById("pedido-total").textContent = pedidoAtual.valorTotal.toFixed(2);
+    const pedido = await apiObterPedido(pedidoAtualNumero);
+
+    document.getElementById("pedido-numero").textContent = pedido.numero;
+    document.getElementById("pedido-mesa").textContent = pedido.mesa;
+    document.getElementById("pedido-status").textContent = pedido.status;
+    document.getElementById("pedido-total").textContent = pedido.valorTotal.toFixed(2);
 
     const lista = document.getElementById("lista-itens");
     lista.innerHTML = "";
-    pedidoAtual.itens.forEach((item) => {
+    pedido.itens.forEach((item) => {
         const linha = document.createElement("li");
-        linha.textContent = item.quantidade + "x " + item.produto.nome + " — R$ " + (item.precoUnitario * item.quantidade).toFixed(2);
+        linha.textContent = item.quantidade + "x " + item.produto + " — R$ " + (item.precoUnitario * item.quantidade).toFixed(2);
         lista.appendChild(linha);
     });
 
-    const finalizado = STATUS_FINALIZADOS.includes(pedidoAtual.status);
+    const finalizado = pedido.status === "entregue" || pedido.status === "cancelado";
     document.getElementById("form-item").hidden = finalizado;
-    document.getElementById("botao-enviar-cozinha").hidden = finalizado || pedidoAtual.status !== "recebido";
-    document.getElementById("form-fechar-conta").hidden = finalizado || pedidoAtual.status !== "pronto";
+    document.getElementById("botao-enviar-cozinha").hidden = finalizado || pedido.status !== "recebido";
+    document.getElementById("form-fechar-conta").hidden = finalizado || pedido.status !== "pronto";
 }
 
-function popularSelectProdutos() {
+async function popularSelectProdutos() {
+    const produtos = await apiObterProdutos();
     const select = document.getElementById("select-produto");
     select.innerHTML = "";
-    dados.produtos.forEach((produto) => {
+    produtos.forEach((produto) => {
         const opcao = document.createElement("option");
         opcao.value = produto.nome;
         opcao.textContent = produto.nome + " — R$ " + produto.preco.toFixed(2);
@@ -291,20 +162,21 @@ function popularSelectProdutos() {
     });
 }
 
-function renderCozinha() {
+async function renderCozinha() {
+    const pendentes = await apiObterCozinha();
     const container = document.getElementById("lista-cozinha");
     container.innerHTML = "";
 
-    dados.cozinha.pedidosPendentes.forEach((pedido) => {
+    pendentes.forEach((pedido) => {
         const linha = document.createElement("div");
-        linha.textContent = "Pedido " + pedido.numero + " — mesa " + pedido.mesa.numero + " ";
+        linha.textContent = "Pedido " + pedido.numero + " — mesa " + pedido.mesa + " ";
 
         const botao = document.createElement("button");
         botao.textContent = "Preparar";
-        botao.addEventListener("click", () => {
-            dados.cozinha.prepararPedido(pedido);
-            renderCozinha();
-            renderPedido();
+        botao.addEventListener("click", async () => {
+            await apiPrepararPedido(pedido.numero);
+            await renderCozinha();
+            await renderPedido();
         });
 
         linha.appendChild(botao);
@@ -312,66 +184,73 @@ function renderCozinha() {
     });
 }
 
-function renderCaixa() {
-    document.getElementById("caixa-total").textContent = dados.caixa.totalRecebido.toFixed(2);
+async function renderCaixa() {
+    const caixa = await apiObterCaixa();
+    document.getElementById("caixa-total").textContent = caixa.totalRecebido.toFixed(2);
 }
 
-function renderEstoque() {
+async function renderEstoque() {
+    const estoques = await apiObterEstoque();
     const container = document.getElementById("lista-estoque");
     container.innerHTML = "";
 
-    dados.estoques.forEach((estoque) => {
+    estoques.forEach((estoque) => {
         const linha = document.createElement("div");
-        const aviso = estoque.verificarEstoqueBaixo() ? " (ESTOQUE BAIXO)" : "";
-        linha.textContent = estoque.produto.nome + ": " + estoque.quantidade + " unidades" + aviso;
+        const aviso = estoque.baixo ? " (ESTOQUE BAIXO)" : "";
+        linha.textContent = estoque.produto + ": " + estoque.quantidade + " unidades" + aviso;
         container.appendChild(linha);
     });
 }
 
-document.getElementById("form-item").addEventListener("submit", (evento) => {
+document.getElementById("form-item").addEventListener("submit", async (evento) => {
     evento.preventDefault();
 
-    const nomeProduto = document.getElementById("select-produto").value;
-    const produto = dados.produtos.find((p) => p.nome === nomeProduto);
+    const produto = document.getElementById("select-produto").value;
     const quantidade = parseInt(document.getElementById("input-quantidade").value, 10);
-    const estoque = dados.estoques.find((e) => e.produto === produto);
 
-    if (estoque.quantidade < quantidade) {
-        alert("Estoque insuficiente.");
+    const resultado = await apiAdicionarItem(pedidoAtualNumero, produto, quantidade);
+    if (resultado.erro) {
+        alert(resultado.erro);
         return;
     }
 
-    pedidoAtual.adicionarItem(produto, quantidade);
-    estoque.atualizarQuantidade(-quantidade);
-
-    renderPedido();
-    renderEstoque();
+    await renderPedido();
+    await renderEstoque();
 });
 
-document.getElementById("botao-enviar-cozinha").addEventListener("click", () => {
-    dados.cozinha.pedidosPendentes.push(pedidoAtual);
-    pedidoAtual.status = "em_preparo";
-    renderPedido();
-    renderCozinha();
+document.getElementById("botao-enviar-cozinha").addEventListener("click", async () => {
+    await apiEnviarParaCozinha(pedidoAtualNumero);
+    await renderPedido();
+    await renderCozinha();
 });
 
-document.getElementById("form-fechar-conta").addEventListener("submit", (evento) => {
+document.getElementById("form-fechar-conta").addEventListener("submit", async (evento) => {
     evento.preventDefault();
+
     const forma = document.getElementById("select-pagamento").value;
-    pedidoAtual.fecharConta(forma, dados.caixa);
-    renderPedido();
-    renderMesas();
-    renderCaixa();
+    const resultado = await apiFecharConta(pedidoAtualNumero, forma);
+    if (resultado.erro) {
+        alert(resultado.erro);
+        return;
+    }
+
+    await renderPedido();
+    await renderMesas();
+    await renderCaixa();
 });
 
-document.getElementById("botao-fechar-caixa").addEventListener("click", () => {
-    const total = dados.caixa.fecharCaixa();
-    alert("Total recebido: R$ " + total.toFixed(2));
-    renderCaixa();
+document.getElementById("botao-fechar-caixa").addEventListener("click", async () => {
+    const resultado = await apiFecharCaixa();
+    alert("Total recebido: R$ " + resultado.total.toFixed(2));
+    await renderCaixa();
 });
 
-popularSelectProdutos();
-renderMesas();
-renderCozinha();
-renderCaixa();
-renderEstoque();
+async function iniciar() {
+    await popularSelectProdutos();
+    await renderMesas();
+    await renderCozinha();
+    await renderCaixa();
+    await renderEstoque();
+}
+
+iniciar();

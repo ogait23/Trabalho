@@ -7,32 +7,39 @@ Equipe: João Victor, Tiago, Rudson
 ## Sobre
 
 Sistema que simula o atendimento da Pizzaria Fornatta no salão: mesas,
-pedidos, cozinha, caixa e estoque. Existem duas formas de ver o sistema
-funcionando, com a mesma modelagem de classes:
+pedidos, cozinha, caixa e estoque.
 
-- um programa de terminal, em Python
-- um mini frontend, em HTML/CSS/JS
+## Versão definitiva (apresentação)
 
-Nenhum dos dois depende do outro, e nenhum dos dois usa banco de dados —
-os dados vivem só na memória enquanto o programa está aberto.
+Flask serve o frontend e expõe uma API que usa as mesmas classes Python de
+`pizzaria/`. O frontend (HTML/CSS/JS puro) fala com essa API — é o
+back-end de verdade, não uma simulação separada.
+
+Como rodar:
+
+```
+pip install -r requirements.txt
+python app.py
+```
+
+Depois abra `http://localhost:5000` no navegador.
 
 ## Estrutura
 
 - `pizzaria/` — uma classe por arquivo (Mesa, Pedido, Produto, Categoria,
   Garcom, Pagamento, Cozinha, Caixa, Estoque)
 - `dados_iniciais.py` — carga inicial de categorias, produtos, mesas e
-  garçons, usada pelo terminal
-- `main.py` — menu de terminal
-- `frontend/` — mini site (HTML, CSS e JavaScript puro, sem framework e
-  sem backend) com as mesmas classes reescritas em JavaScript
+  garçons
+- `app.py` — servidor Flask: serve o frontend e expõe a API usada por ele
+- `frontend/` — HTML, CSS e JavaScript puro (sem framework), consome a API
+  do `app.py`
+- `main.py` — versão alternativa em terminal, sem Flask, usando as mesmas
+  classes
 
-## Como rodar
+## Versão alternativa (terminal)
 
-Terminal (precisa de Python 3, sem bibliotecas externas):
+Sem instalar nada, sem navegador:
 
 ```
 python main.py
 ```
-
-Frontend (não precisa de nada instalado): abra o arquivo
-`frontend/index.html` direto no navegador.
