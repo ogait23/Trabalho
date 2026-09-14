@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pizzaria Fornatta</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<header>
+    <h1>Pizzaria Fornatta</h1>
+</header>
+
+<main>
+    <section id="secao-mesas">
+        <h2>Mesas</h2>
+        <div id="lista-mesas" class="grade"></div>
+    </section>
+
+    <section id="secao-pedido" hidden>
+        <h2>Pedido <span id="pedido-numero"></span> — Mesa <span id="pedido-mesa"></span></h2>
+        <p>Status: <span id="pedido-status"></span></p>
+        <ul id="lista-itens"></ul>
+        <p class="total">Total: R$ <span id="pedido-total">0.00</span></p>
+
+        <form id="form-item">
+            <select id="select-produto"></select>
+            <input type="number" id="input-quantidade" value="1" min="1">
+            <button type="submit">Adicionar item</button>
+        </form>
+
+        <button id="botao-enviar-cozinha">Enviar para a cozinha</button>
+
+        <form id="form-fechar-conta">
+            <select id="select-pagamento">
+                <option value="dinheiro">Dinheiro</option>
+                <option value="cartao">Cartão</option>
+                <option value="pix">Pix</option>
+            </select>
+            <button type="submit">Fechar conta</button>
+        </form>
+    </section>
+
+    <section id="secao-cozinha">
+        <h2>Cozinha</h2>
+        <div id="lista-cozinha"></div>
+    </section>
+
+    <section id="secao-caixa">
+        <h2>Caixa</h2>
+        <p class="total">Total recebido: R$ <span id="caixa-total">0.00</span></p>
+        <button id="botao-fechar-caixa">Fechar caixa</button>
+    </section>
+
+    <section id="secao-estoque">
+        <h2>Estoque</h2>
+        <div id="lista-estoque"></div>
+    </section>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

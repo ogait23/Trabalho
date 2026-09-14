@@ -1,0 +1,82 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #2b2b2b;
+    background-color: #faf7f2;
+}
+
+header {
+    padding: 16px 32px;
+    background-color: #7a2c15;
+    color: #ffffff;
+}
+
+main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px 32px 64px;
+}
+
+section {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e0d7cc;
+}
+
+h2 {
+    color: #7a2c15;
+}
+
+.grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.cartao-mesa {
+    border: 1px solid #e0d7cc;
+    border-radius: 8px;
+    padding: 12px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.total {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+select, input, button {
+    padding: 6px 10px;
+    border: 1px solid #cbbfae;
+    border-radius: 4px;
+}
+
+button {
+    background-color: #7a2c15;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #5c2110;
+}
+
+#lista-cozinha div, #lista-estoque div {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee0d3;
+}
