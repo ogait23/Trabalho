@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pizzaria Fornatta</title>
+<link rel="icon" href="pizza.svg" type="image/svg+xml">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<header class="topo">
+    <a class="marca" href="/">
+        <img src="pizza.svg" alt="" width="38" height="38">
+        <span>Pizzaria Fornatta</span>
+    </a>
+    <div id="barra-usuario" hidden>
+        <span id="usuario-nome"></span>
+        <button id="botao-sair" type="button" class="botao-claro">Sair</button>
+    </div>
+</header>
+
+<section id="hero" class="hero">
+    <div class="hero-miolo">
+        <div class="hero-texto">
+            <h1>Pizza quente, direto do forno para a sua casa</h1>
+            <p>Monte o seu pedido pelo site, acompanhe o preparo e pague só quando a pizza chegar: em dinheiro ou no cartão.</p>
+            <a class="botao" href="#secao-cardapio">Ver o cardápio</a>
+        </div>
+        <img class="hero-pizza" src="pizza.svg" alt="Pizza de pepperoni com manjericão" width="360" height="360">
+    </div>
+</section>
+
+<main>
+    <section id="secao-acesso" class="acesso">
+        <div class="abas" role="tablist">
+            <button type="button" class="aba ativa" data-aba="entrar" role="tab">Entrar</button>
+            <button type="button" class="aba" data-aba="cadastrar" role="tab">Criar conta</button>
+        </div>
+
+        <form id="form-login" class="form-vertical">
+            <label>E-mail
+                <input id="login-email" type="email" autocomplete="email" required>
+            </label>
+            <label>Senha
+                <input id="login-senha" type="password" autocomplete="current-password" required>
+            </label>
+            <button type="submit">Entrar</button>
+        </form>
+
+        <form id="form-cadastro" class="form-vertical" hidden>
+            <label>Nome completo
+                <input id="cadastro-nome" autocomplete="name" required>
+            </label>
+            <label>E-mail
+                <input id="cadastro-email" type="email" autocomplete="email" required>
+            </label>
+            <label>Telefone com DDD
+                <input id="cadastro-telefone" inputmode="numeric" autocomplete="tel" required>
+            </label>
+            <label>Senha (mínimo 8 caracteres)
+                <input id="cadastro-senha" type="password" autocomplete="new-password" minlength="8" required>
+            </label>
+            <label>Repita a senha
+                <input id="cadastro-confirmacao" type="password" autocomplete="new-password" minlength="8" required>
+            </label>
+            <button type="submit">Criar conta</button>
+        </form>
+    </section>
+
+    <section id="secao-cardapio">
+        <h2>Cardápio</h2>
+        <p class="aviso">Pagamento somente presencial: em dinheiro ou cartão, na entrega ou no estabelecimento. Pizzas no tamanho grande (35 cm, 8 fatias).</p>
+        <nav id="nav-cardapio" class="nav-cardapio"></nav>
+        <div id="lista-cardapio"></div>
+    </section>
+
+    <section data-perfis="cliente" hidden>
+        <h2>Seu pedido de entrega</h2>
+        <ul id="lista-carrinho" class="lista-limpa"></ul>
+        <p class="total">Total: R$ <span id="carrinho-total">0.00</span></p>
+        <form id="form-entrega">
+            <input id="entrega-endereco" class="largo" placeholder="Endereço completo (rua, número, bairro)" required>
+            <button type="submit">Fazer pedido</button>
+        </form>
+        <p class="aviso">Você paga ao entregador, em dinheiro ou cartão na maquininha.</p>
+        <h3>Meus pedidos</h3>
+        <div id="lista-meus-pedidos"></div>
+    </section>
+
+    <section data-perfis="garcom" hidden>
+        <h2>Mesas</h2>
+        <div id="lista-mesas" class="grade"></div>
+    </section>
+
+    <section id="secao-pedido" data-perfis="garcom" hidden>
+        <h2>Pedido <span id="pedido-numero"></span> — Mesa <span id="pedido-mesa"></span></h2>
+        <p>Status: <span id="pedido-status"></span></p>
+        <ul id="lista-itens"></ul>
+        <p class="total">Total: R$ <span id="pedido-total">0.00</span></p>
+        <form id="form-item">
+            <select id="select-produto"></select>
+            <input type="number" id="input-quantidade" value="1" min="1" max="20">
+            <button type="submit">Adicionar item</button>
+        </form>
+        <button id="botao-enviar-cozinha" type="button">Enviar para a cozinha</button>
+        <form id="form-fechar-conta">
+            <select id="select-pagamento">
+                <option value="dinheiro">Dinheiro</option>
+                <option value="cartao_debito">Cartão de débito</option>
+                <option value="cartao_credito">Cartão de crédito</option>
+            </select>
+            <button type="submit">Receber e fechar conta</button>
+        </form>
+    </section>
+
+    <section data-perfis="garcom" hidden>
+        <h2>Entregas</h2>
+        <div id="lista-entregas"></div>
+    </section>
+
+    <section data-perfis="cozinha" hidden>
+        <h2>Cozinha</h2>
+        <div id="lista-cozinha"></div>
+        <h2>Estoque</h2>
+        <div id="lista-estoque"></div>
+    </section>
+
+    <section data-perfis="gerente" hidden>
+        <h2>Caixa</h2>
+        <p class="total">Total recebido: R$ <span id="caixa-total">0.00</span></p>
+        <button id="botao-fechar-caixa" type="button">Fechar caixa</button>
+    </section>
+</main>
+
+<footer class="rodape">
+    <p>Pizzaria Fornatta. Pagamento somente presencial, em dinheiro ou cartão.</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
