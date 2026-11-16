@@ -36,6 +36,12 @@ async function requisitar(caminho, corpo) {
     }
     try {
         const resposta = await fetch(BASE + caminho, { ...opcoes, signal: AbortSignal.timeout(15000) });
+        if (!resposta.headers.get("content-type")?.includes("application/json")) {
+            // o servidor respondeu, mas não conhece essa rota: está rodando um código antigo
+            const aviso = "O servidor está desatualizado. Feche o terminal do servidor (Ctrl+C) e rode python app.py de novo.";
+            if (corpo !== undefined) return { erro: aviso };
+            throw new Error(aviso);
+        }
         const json = await resposta.json();
         if (resposta.status === 401 && sessao.usuario) {
             sessao.usuario = null;
@@ -46,6 +52,7 @@ async function requisitar(caminho, corpo) {
         if (!resposta.ok && corpo === undefined) throw new Error(json.erro || "Não foi possível carregar os dados.");
         return json;
     } catch (erro) {
+        if (erro.message.startsWith("O servidor está desatualizado")) throw erro;
         const mensagem = "Não foi possível conectar à pizzaria. Tente novamente.";
         if (corpo !== undefined) return { erro: mensagem };
         throw new Error(mensagem, { cause: erro });

@@ -368,8 +368,7 @@ p { margin:0 }
 .table-item-name b { color:var(--red) }
 .table-item-price { min-width:76px; text-align:right; font-weight:800 }
 .table-items .stepper button { width:30px; height:30px; font-size:17px }
-.remove-item { width:32px; height:32px; border-radius:50%; font-size:15px }
-.remove-item:hover { background:var(--red-soft) }
+.table-items .stepper button.is-trash { font-size:14px }
 .mini-filters { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px }
 .chip-sm { padding:6px 12px; font-size:13px }
 .product-buttons { display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; max-height:300px; overflow:auto; padding:2px; margin-bottom:12px }

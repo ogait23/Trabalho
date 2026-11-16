@@ -181,18 +181,17 @@ async function renderPedidoMesa() {
                 if (r.erro) { notificar(r.erro); return; }
                 await renderPedidoMesa();
             });
+            // quando só tem 1, o "−" vira lixeira e remove o item
+            const ultimo = item.quantidade === 1;
             const stepper = criar("span", undefined, "stepper");
-            const menos = botao("−", "");
+            const menos = botao(ultimo ? "🗑" : "−", ultimo ? "is-trash" : "");
             const mais = botao("+", "");
-            const lixo = botao("🗑", "remove-item");
-            menos.setAttribute("aria-label", "Tirar uma " + item.produto);
+            menos.setAttribute("aria-label", (ultimo ? "Remover " : "Tirar uma ") + item.produto);
             mais.setAttribute("aria-label", "Pôr mais uma " + item.produto);
-            lixo.setAttribute("aria-label", "Remover " + item.produto);
             menos.addEventListener("click", mudar(item.quantidade - 1));
             mais.addEventListener("click", mudar(item.quantidade + 1));
-            lixo.addEventListener("click", mudar(0));
             stepper.append(menos, criar("b", String(item.quantidade)), mais);
-            li.append(stepper, lixo);
+            li.append(stepper);
         }
         li.append(criar("span", "R$ " + dinheiro(item.precoUnitario * item.quantidade), "table-item-price"));
         itens.appendChild(li);

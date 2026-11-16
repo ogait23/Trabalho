@@ -3,3 +3,7 @@ venv/
 __pycache__/
 *.pyc
 video-demo/
+*.rar
+*.zip
+*.mp4
+*.webm

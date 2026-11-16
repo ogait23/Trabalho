@@ -1,6 +1,7 @@
 import os
 import re
 import secrets
+import socket
 import time
 from datetime import timedelta
 from functools import wraps
@@ -535,5 +536,16 @@ def fechar_caixa():
     return jsonify({"total": dados.caixa.fecharCaixa()})
 
 
+def porta_ocupada(porta):
+    """No Windows, dois 'python app.py' conseguem abrir a mesma porta e um servidor velho
+    continua respondendo. Por isso conferimos antes de ligar."""
+    with socket.socket() as teste:
+        return teste.connect_ex(("127.0.0.1", porta)) == 0
+
+
 if __name__ == "__main__":
+    if porta_ocupada(5000):
+        print("Já existe um servidor rodando na porta 5000.")
+        print("Feche o outro terminal (Ctrl+C) e rode 'python app.py' de novo.")
+        raise SystemExit(1)
     app.run(debug=os.environ.get("FLASK_DEBUG") == "1")
