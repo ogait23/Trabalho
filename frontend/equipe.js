@@ -9,6 +9,7 @@ const painel = {
     produtos: [],
     mesaAberta: null,     // número do pedido da mesa que está aberta no painel lateral
     mesaNumero: null,
+    categoriaMesa: "Pizzas Tradicionais", // filtro dos botões de produto na mesa
     filaAnterior: null,   // para avisar "novo pedido na cozinha"
 };
 
@@ -165,21 +166,52 @@ async function renderPedidoMesa() {
     topo.append(criar("h3", "Mesa " + pedido.mesa + " · #" + pedido.numero), status);
     lateral.appendChild(topo);
 
-    // itens já lançados
-    const itens = criar("ul", undefined, "ticket-items");
+    // itens já lançados (antes de ir para a cozinha dá para pôr mais um, tirar um ou remover)
+    const editavel = pedido.status === "recebido";
+    const itens = criar("ul", undefined, "table-items");
     if (!pedido.itens.length) itens.appendChild(criar("li", "Nenhum item ainda. Toque nos produtos abaixo.", "muted"));
-    pedido.itens.forEach(item => {
+    pedido.itens.forEach((item, indice) => {
         const li = criar("li");
-        li.append(criar("b", item.quantidade + "x"), document.createTextNode(" " + item.produto + " — R$ " + dinheiro(item.precoUnitario * item.quantidade)));
+        const nome = criar("span", undefined, "table-item-name");
+        nome.append(criar("b", item.quantidade + "x"), document.createTextNode(" " + item.produto));
+        li.append(nome);
+        if (editavel) {
+            const mudar = (nova) => acaoSegura(async () => {
+                const r = await requisitar("/pedidos/" + pedido.numero + "/itens/" + indice, { quantidade: nova });
+                if (r.erro) { notificar(r.erro); return; }
+                await renderPedidoMesa();
+            });
+            const stepper = criar("span", undefined, "stepper");
+            const menos = botao("−", "");
+            const mais = botao("+", "");
+            const lixo = botao("🗑", "remove-item");
+            menos.setAttribute("aria-label", "Tirar uma " + item.produto);
+            mais.setAttribute("aria-label", "Pôr mais uma " + item.produto);
+            lixo.setAttribute("aria-label", "Remover " + item.produto);
+            menos.addEventListener("click", mudar(item.quantidade - 1));
+            mais.addEventListener("click", mudar(item.quantidade + 1));
+            lixo.addEventListener("click", mudar(0));
+            stepper.append(menos, criar("b", String(item.quantidade)), mais);
+            li.append(stepper, lixo);
+        }
+        li.append(criar("span", "R$ " + dinheiro(item.precoUnitario * item.quantidade), "table-item-price"));
         itens.appendChild(li);
     });
     lateral.append(itens, criar("p", "Total: R$ " + dinheiro(pedido.valorTotal), "table-total"));
 
-    if (pedido.status === "recebido") {
-        // botões de produto: um toque = +1 item
+    if (editavel) {
+        // filtro por categoria + botões de produto (um toque = +1 item)
         lateral.appendChild(criar("p", "Adicionar (um toque = 1 unidade)", "label-small"));
+        const filtros = criar("div", undefined, "mini-filters");
+        const rotulos = { "Pizzas Tradicionais": "Tradicionais", "Pizzas Especiais": "Especiais", "Pizzas Doces": "Doces", "Refrigerantes": "Refri" };
+        [...new Set(painel.produtos.map(p => p.categoria))].forEach(categoria => {
+            const chip = botao(rotulos[categoria] || categoria, "chip chip-sm", () => { painel.categoriaMesa = categoria; renderPedidoMesa(); });
+            chip.setAttribute("aria-pressed", String(categoria === painel.categoriaMesa));
+            filtros.appendChild(chip);
+        });
+        lateral.appendChild(filtros);
         const grade = criar("div", undefined, "product-buttons");
-        painel.produtos.forEach(produto => {
+        painel.produtos.filter(p => p.categoria === painel.categoriaMesa).forEach(produto => {
             const b = botao("", "product-button" + (produto.categoria === "Refrigerantes" ? " drink" : ""));
             b.append(criar("span", produto.nome), criar("small", "R$ " + dinheiro(produto.preco)));
             b.addEventListener("click", acaoSegura(async () => {

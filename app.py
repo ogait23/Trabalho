@@ -425,6 +425,37 @@ def adicionar_item(numero):
     return jsonify(pedido_para_dict(pedido))
 
 
+@app.route("/api/pedidos/<int:numero>/itens/<int:indice>", methods=["POST"])
+@exige("garcom")
+def editar_item(numero, indice):
+    """Garçom põe mais uma ou tira uma de um item da mesa (quantidade 0 = remove)."""
+    pedido = encontrar_pedido(numero)
+    if pedido is None:
+        return jsonify({"erro": "Pedido não encontrado."}), 404
+    try:
+        quantidade = int(corpo_json().get("quantidade", 0))
+    except (TypeError, ValueError):
+        return jsonify({"erro": "Quantidade inválida."}), 400
+
+    # se aumentou, confere se tem estoque
+    if 0 <= indice < len(pedido.itens):
+        item = pedido.itens[indice]
+        estoque = dados.estoque_do_produto(item["produto"])
+        aumento = quantidade - item["quantidade"]
+        if aumento > 0 and estoque is not None and estoque.quantidade < aumento:
+            return jsonify({"erro": f"Estoque insuficiente de {item['produto'].nome}."}), 400
+
+    try:
+        produto, diferenca = pedido.alterarQuantidade(indice, quantidade)
+    except ValueError as erro:
+        return jsonify({"erro": str(erro)}), 400
+
+    estoque = dados.estoque_do_produto(produto)
+    if estoque is not None:
+        estoque.atualizarQuantidade(-diferenca)  # devolve ou tira do estoque
+    return jsonify(pedido_para_dict(pedido))
+
+
 @app.route("/api/pedidos/<int:numero>/cozinha", methods=["POST"])
 @exige("garcom")
 def enviar_para_cozinha(numero):

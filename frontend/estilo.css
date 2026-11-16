@@ -362,6 +362,16 @@ p { margin:0 }
 .table-panel-head { display:flex; align-items:center; gap:10px; margin-bottom:10px }
 .table-panel-head h3 { font-size:22px }
 .table-total { font-size:20px; font-weight:900; margin-top:10px }
+.table-items { list-style:none; padding:0; margin:0 }
+.table-items li { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px dashed var(--line) }
+.table-item-name { flex:1; font-weight:700 }
+.table-item-name b { color:var(--red) }
+.table-item-price { min-width:76px; text-align:right; font-weight:800 }
+.table-items .stepper button { width:30px; height:30px; font-size:17px }
+.remove-item { width:32px; height:32px; border-radius:50%; font-size:15px }
+.remove-item:hover { background:var(--red-soft) }
+.mini-filters { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px }
+.chip-sm { padding:6px 12px; font-size:13px }
 .product-buttons { display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; max-height:300px; overflow:auto; padding:2px; margin-bottom:12px }
 .product-button { display:flex; flex-direction:column; align-items:flex-start; padding:10px 12px; border-radius:12px; background:var(--yellow-soft); border:1.5px solid #f3dca5; text-align:left; font-weight:800; font-size:14px; transition:all .15s }
 .product-button small { font-weight:600; color:var(--muted) }

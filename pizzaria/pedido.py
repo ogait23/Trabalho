@@ -34,7 +34,34 @@ class Pedido:
     def adicionarItem(self, produto, quantidade):
         if self.status in STATUS_FINALIZADOS:
             raise ValueError(f"Pedido {self.numero} já foi finalizado.")
-        self.itens.append({"produto": produto, "quantidade": quantidade, "precoUnitario": produto.preco})
+        # Se o mesmo produto já está no pedido, só soma a quantidade
+        for item in self.itens:
+            if item["produto"] is produto:
+                item["quantidade"] += quantidade
+                break
+        else:
+            self.itens.append({"produto": produto, "quantidade": quantidade, "precoUnitario": produto.preco})
+        self.calcularTotal()
+
+    def alterarQuantidade(self, indice, quantidade):
+        """Põe mais uma ou tira uma de um item. Quantidade 0 remove o item.
+        Só pode antes de ir para a cozinha. Devolve (produto, quanto a quantidade mudou)."""
+        if self.status != "recebido":
+            raise ValueError("Só dá para editar antes de enviar para a cozinha.")
+        if not 0 <= indice < len(self.itens):
+            raise ValueError("Item não encontrado.")
+        if not 0 <= quantidade <= 20:
+            raise ValueError("A quantidade deve ser de 0 a 20.")
+        item = self.itens[indice]
+        diferenca = quantidade - item["quantidade"]
+        if quantidade == 0:
+            self.itens.pop(indice)
+        else:
+            item["quantidade"] = quantidade
+        self.calcularTotal()
+        return item["produto"], diferenca
+
+    def calcularTotal(self):
         self.valorTotal = sum(item["precoUnitario"] * item["quantidade"] for item in self.itens)
 
     def fecharConta(self, forma_pagamento, caixa):
