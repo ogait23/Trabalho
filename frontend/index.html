@@ -3,282 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#f5f1e8">
-    <meta name="description" content="Um bom encontro começa com uma boa pizza. Peça para entrega ou retire no balcão e pague na hora.">
-    <title>Fornatta — Bons momentos, boas pizzas.</title>
+    <meta name="theme-color" content="#221e1a">
+    <meta name="description" content="Pizzaria Fornatta: pizza e refri. Peça para entrega ou retire no balcão e pague na hora.">
+    <title>Fornatta — Pizza quentinha, do forno pra sua mesa</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="estilo.css">
-    <script src="landing.js" defer></script>
-    <script src="script.js" defer></script>
+    <script src="comum.js" defer></script>
+    <script src="loja.js" defer></script>
 </head>
 <body>
-<a class="skip-link" href="#secao-cardapio">Pular para o cardápio</a>
-<div class="top-note">Entrega ou retirada no balcão · Pagamento na hora, em dinheiro ou cartão <span>Buon appetito!</span></div>
+<a class="skip-link" href="#cardapio">Pular para o cardápio</a>
 
+<!-- ===== Topo ===== -->
 <header class="site-header">
-    <a class="brand" href="#inicio" aria-label="Fornatta, início">fornatta<span class="brand-dot">.</span><small>PIZZARIA & BONS MOMENTOS</small></a>
-    <nav class="desktop-nav" aria-label="Navegação principal">
-        <a href="#secao-cardapio">Cardápio</a><a href="#nosso-jeito">Nosso jeito</a><a href="#como-pedir">Como pedir</a>
-    </nav>
-    <div class="header-actions">
-        <button class="login-trigger text-button" data-open="acesso-dialog" type="button">Entrar <span aria-hidden="true">↗</span></button>
-        <div id="barra-usuario" hidden><span id="usuario-nome"></span><button id="botao-sair" class="text-button" type="button">Sair</button></div>
-        <button class="cart-trigger" data-open="carrinho-dialog" type="button" aria-label="Abrir meu pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg><span class="cart-label">Meu pedido</span><span id="cart-count" class="cart-count">0</span></button>
-        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Abrir menu"><span></span><span></span></button>
+    <div class="header-inner">
+        <a class="brand" href="#inicio" aria-label="Pizzaria Fornatta, início"><small>PIZZARIA</small>Fornatta</a>
+        <nav class="site-nav" aria-label="Navegação principal">
+            <a href="#inicio">Início</a>
+            <a href="#cardapio">Cardápio</a>
+            <a href="#como-pedir">Como pedir</a>
+        </nav>
+        <div class="header-actions">
+            <a id="link-painel" class="pill pill-dark" href="equipe.html" hidden>Painel da equipe</a>
+            <span id="usuario-chip" class="user-chip" hidden></span>
+            <button id="botao-entrar" class="pill pill-red" type="button" data-open="acesso-dialog">Entrar</button>
+            <button id="botao-sair" class="pill pill-ghost" type="button" hidden>Sair</button>
+            <button class="pill pill-red cart-pill" type="button" data-open="carrinho-dialog">Sacola <span class="cart-count" data-cart-count>0</span></button>
+        </div>
     </div>
-    <nav id="mobile-nav" class="mobile-nav" aria-label="Navegação móvel" hidden><a href="#secao-cardapio">Cardápio</a><a href="#nosso-jeito">Nosso jeito</a><a href="#como-pedir">Como pedir</a><button class="text-button login-trigger" data-open="acesso-dialog" type="button">Entrar na minha conta ↗</button></nav>
 </header>
 
 <main>
-    <!-- ===== Apresentação ===== -->
-    <section class="hero section-shell" id="inicio" aria-labelledby="hero-title">
-        <div class="hero-copy">
-            <p class="eyebrow"><span class="tiny-star" aria-hidden="true">✳</span> FEITA PARA COMPARTILHAR</p>
-            <h1 id="hero-title">Bons momentos.<br>Boas conversas.<br><em>Uma bela pizza.</em></h1>
-            <p class="hero-description">Tem coisas que deixam qualquer dia melhor.<br> Uma mesa cheia, gente querida e uma Fornatta no meio.</p>
-            <a class="button primary" href="#secao-cardapio">Encontre sua favorita <span aria-hidden="true">↗</span></a>
-            <div class="hero-details"><span><i aria-hidden="true">◷</i> Entrega ou retirada</span><span><i aria-hidden="true">♡</i> Paga só na hora</span></div>
-        </div>
-        <div class="hero-scene" data-parallax>
-            <div class="orbit orbit-one" aria-hidden="true"></div><div class="orbit orbit-two" aria-hidden="true"></div>
-            <div class="hero-photo-wrap" data-tilt>
-                <img class="hero-photo" src="assets/pizza-forno.jpg" alt="Pizza dourada sobre uma tábua, acompanhada de tomates e ervas" width="1200" height="800" fetchpriority="high">
-                <span class="photo-caption">O próximo pedaço é seu.</span>
+    <!-- ===== Hero escuro ===== -->
+    <section class="hero" id="inicio" aria-labelledby="hero-title">
+        <div class="container hero-inner">
+            <div class="hero-copy">
+                <p class="eyebrow">PIZZARIA FORNATTA · DO FORNO PRA VOCÊ</p>
+                <h1 id="hero-title">Pizza quentinha,<br>do forno pra<br><em>sua mesa.</em></h1>
+                <p class="hero-text">Escolha sua pizza, pegue um refri gelado e receba em casa ou retire no balcão. Você só paga na hora.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-red" href="#cardapio">Escolher minha pizza ↗</a>
+                    <a class="btn btn-outline" href="#como-pedir">Como funciona</a>
+                </div>
+                <ul class="hero-badges">
+                    <li>Entrega ou retirada</li>
+                    <li>Pague na hora</li>
+                    <li>Acompanhe ao vivo</li>
+                </ul>
             </div>
-            <div class="round-seal" aria-label="Pizza, amore e Fornatta"><span>PIZZA & AMORE</span><b aria-hidden="true">✳</b><span>À MODA FORNATTA</span></div>
-            <div class="floating-note"><span aria-hidden="true">♡</span><div>O ingrediente especial?<strong>Estar junto.</strong></div></div>
-            <span class="hero-spark" aria-hidden="true">✴</span>
+            <div class="hero-visual">
+                <div class="hero-card">
+                    <img src="assets/pizza-forno.jpg" alt="Pizza saindo do forno" width="1200" height="800" fetchpriority="high">
+                </div>
+                <span class="hero-note">Saindo do forno<br><strong>agora mesmo.</strong></span>
+                <span class="spark spark-1" aria-hidden="true">✦</span>
+                <span class="spark spark-2" aria-hidden="true">✦</span>
+            </div>
         </div>
-        <a class="scroll-cue" href="#secao-cardapio"><span aria-hidden="true">↓</span> ROLE PARA DAR ÁGUA NA BOCA</a>
     </section>
 
-    <!-- Faixa que corre sozinha (o texto está duplicado para o loop não ter emenda) -->
-    <div class="flavor-ribbon" aria-hidden="true"><div class="ribbon-track">
-        <span>UMA FATIA DE FELICIDADE</span><b>✳</b><span>DO FORNO PARA A MESA</span><b>✳</b><span>RETIRE NO BALCÃO</span><b>✳</b><span>PAGUE NA HORA</span><b>✳</b>
-        <span>UMA FATIA DE FELICIDADE</span><b>✳</b><span>DO FORNO PARA A MESA</span><b>✳</b><span>RETIRE NO BALCÃO</span><b>✳</b><span>PAGUE NA HORA</span><b>✳</b>
+    <div class="ribbon" aria-hidden="true"><div class="ribbon-track">
+        <span>01 · Escolha sua pizza</span><span>02 · Entrega ou balcão</span><span>03 · Pague na hora</span><span>04 · Acompanhe ao vivo</span>
+        <span>01 · Escolha sua pizza</span><span>02 · Entrega ou balcão</span><span>03 · Pague na hora</span><span>04 · Acompanhe ao vivo</span>
     </div></div>
 
     <!-- ===== Cardápio ===== -->
-    <section id="secao-cardapio" class="menu-section section-shell" aria-labelledby="menu-title">
-        <div class="section-heading reveal"><div><p class="eyebrow">ESCOLHA SEU PRÓXIMO BOM MOMENTO</p><h2 id="menu-title">Difícil é escolher<br><em>uma só.</em></h2></div><p>Dos clássicos que abraçam aos sabores que surpreendem.<br> Pizzas grandes: 35 cm e 8 fatias para dividir.<br><small>Ou não. A gente entende.</small></p></div>
-        <div class="menu-tools">
-            <div id="filtros-cardapio" class="menu-filters" role="group" aria-label="Categorias do cardápio"></div>
-            <label class="menu-search"><span class="visually-hidden">Buscar no cardápio</span><input id="busca-cardapio" type="search" placeholder="Buscar sabor ou ingrediente…" autocomplete="off"></label>
+    <section class="container section" id="cardapio" aria-labelledby="cardapio-title">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow eyebrow-red">BATEU AQUELA FOME?</p>
+                <h2 id="cardapio-title">Pizza e refri. <em>Simples assim.</em></h2>
+                <p class="muted">Pizzas grandes de 35 cm, 8 fatias. Refri sempre gelado.</p>
+            </div>
+            <label class="search"><span class="visually-hidden">Buscar no cardápio</span><input id="busca-cardapio" type="search" placeholder="Buscar sabor…" autocomplete="off"></label>
         </div>
-        <div id="lista-cardapio" aria-live="polite" aria-busy="true"><p class="menu-loading">Preparando o cardápio…</p></div>
-        <div class="menu-footnote"><p>Fotos ilustrativas. O sabor de verdade chega à sua mesa.</p><p>Sem pagamento online: você paga na entrega ou no balcão, em dinheiro ou cartão.</p></div>
-    </section>
-
-    <!-- ===== História ===== -->
-    <section id="nosso-jeito" class="story-section" aria-labelledby="story-title">
-        <div class="story-inner section-shell">
-            <div class="story-visual reveal" data-parallax><div class="story-image" data-tilt><img src="assets/pizza-hero.jpg" alt="Duas pessoas compartilhando uma pizza à mesa" width="1200" height="960" loading="lazy"></div><span class="story-sticker">É sobre<br><em>dividir.</em><span aria-hidden="true">♡</span></span></div>
-            <div class="story-copy reveal"><p class="eyebrow">ESSE É O NOSSO JEITO</p><h2 id="story-title">Pizza é boa.<br>Com companhia,<br><em>é ainda melhor.</em></h2><p>A primeira fatia puxa uma conversa. A segunda vira uma boa história. E, quando você percebe, ninguém quer sair da mesa.</p><p>É para esses encontros que a Fornatta existe. Do clássico molho de tomate à combinação que você ainda vai descobrir, sempre tem um sabor para o seu momento.</p><a class="underlined-link" href="#secao-cardapio">Vamos escolher a de hoje? <span aria-hidden="true">↗</span></a></div>
-        </div>
+        <div id="filtros-cardapio" class="filters" role="group" aria-label="Categorias do cardápio"></div>
+        <div id="lista-cardapio" class="product-grid" aria-live="polite"><p class="state">Preparando o cardápio…</p></div>
     </section>
 
     <!-- ===== Como pedir ===== -->
-    <section id="como-pedir" class="steps-section section-shell" aria-labelledby="steps-title">
-        <div class="section-heading reveal"><div><p class="eyebrow">DA VONTADE À PRIMEIRA FATIA</p><h2 id="steps-title">Seu único trabalho?<br><em>Escolher o sabor.</em></h2></div><span class="steps-doodle" aria-hidden="true">↴</span></div>
-        <div class="steps-grid">
-            <article class="reveal"><span class="step-number">01</span><h3>Encontre a sua favorita</h3><p>Passe pelo cardápio. Tem clássicas, especiais, doces e companhia para a sua pizza.</p></article>
-            <article class="reveal"><span class="step-number">02</span><h3>Entrega ou balcão?</h3><p>Entre na sua conta, monte o pedido e escolha: receber em casa ou retirar no balcão.</p></article>
-            <article class="reveal"><span class="step-number">03</span><h3>Pague na hora</h3><p>Acompanhe o pedido ao vivo e pague na entrega ou no balcão, em dinheiro ou cartão.</p></article>
+    <section class="steps-band" id="como-pedir" aria-labelledby="como-title">
+        <div class="container">
+            <p class="eyebrow">DO SEU JEITO</p>
+            <h2 id="como-title">Poucos passos. <em>Muito sabor.</em></h2>
+            <div class="steps">
+                <article><span>01 / ESCOLHA</span><h3>Monte sua sacola</h3><p>Pizzas e refris do cardápio. Dá pra ver tudo sem entrar na conta.</p></article>
+                <article><span>02 / RECEBA</span><h3>Entrega ou balcão</h3><p>Receba em casa ou passe aqui para retirar. Você escolhe.</p></article>
+                <article><span>03 / PAGUE NA HORA</span><h3>Sem pagamento online</h3><p>Dinheiro, débito ou crédito, na entrega ou no balcão. E acompanhe ao vivo.</p></article>
+            </div>
         </div>
     </section>
-
-    <section class="closing-section reveal"><span class="closing-star" aria-hidden="true">✳</span><p class="eyebrow">HOJE COMBINA COM FORNATTA</p><h2>A mesa está quase pronta.<br><em>Só falta a sua pizza.</em></h2><a class="button light" href="#secao-cardapio">Quero escolher a minha <span aria-hidden="true">↗</span></a><p>Escolha. Compartilhe. Aproveite.</p></section>
-
-    <!-- ===== Área da equipe (só aparece para garçom, cozinha e gerente) ===== -->
-    <div id="area-operacional" class="section-shell operational" hidden>
-        <div class="section-heading">
-            <div><p class="eyebrow">ÁREA DA EQUIPE</p><h2>Gestão da pizzaria</h2></div>
-            <div class="ops-refresh"><span class="live-dot" aria-hidden="true"></span><span id="ultima-atualizacao">Atualiza sozinho</span><button id="atualizar-operacao" type="button">Atualizar agora</button></div>
-        </div>
-
-        <section data-perfis="garcom" hidden>
-            <h2>Mesas</h2>
-            <div id="lista-mesas" class="grade"></div>
-        </section>
-
-        <section id="secao-pedido" data-perfis="garcom" hidden>
-            <h2>Pedido <span id="pedido-numero"></span> · Mesa <span id="pedido-mesa"></span></h2>
-            <p>Status: <span id="pedido-status" class="chip"></span></p>
-            <ul id="lista-itens" class="ticket-items"></ul>
-            <p class="total">Total <span>R$ <span id="pedido-total">0,00</span></span></p>
-            <form id="form-item">
-                <select id="select-produto" aria-label="Produto"></select>
-                <input type="number" id="input-quantidade" value="1" min="1" max="20" aria-label="Quantidade">
-                <button type="submit">Adicionar item</button>
-            </form>
-            <button id="botao-enviar-cozinha" type="button">Enviar para a cozinha</button>
-            <form id="form-fechar-conta">
-                <select id="select-pagamento" aria-label="Forma de pagamento">
-                    <option value="dinheiro">Dinheiro</option>
-                    <option value="cartao_debito">Cartão de débito</option>
-                    <option value="cartao_credito">Cartão de crédito</option>
-                </select>
-                <button type="submit">Receber e fechar conta</button>
-            </form>
-        </section>
-
-        <section data-perfis="garcom" hidden>
-            <h2>Entregas e retiradas no balcão</h2>
-            <div id="lista-pedidos-clientes" class="tickets"></div>
-        </section>
-
-        <section data-perfis="cozinha" hidden>
-            <h2>Fila da cozinha</h2>
-            <div id="lista-cozinha" class="tickets"></div>
-            <h2>Estoque</h2>
-            <div id="lista-estoque" class="stock-grid"></div>
-        </section>
-
-        <section data-perfis="gerente" hidden>
-            <h2>Caixa</h2>
-            <p class="total">Total recebido <span>R$ <span id="caixa-total">0,00</span></span></p>
-            <button id="botao-fechar-caixa" type="button">Fechar caixa</button>
-        </section>
-    </div>
 </main>
 
-<footer class="site-footer section-shell"><div><a class="brand" href="#inicio">fornatta<span class="brand-dot">.</span><small>PIZZARIA & BONS MOMENTOS</small></a><p>Uma boa pizza. Um bom motivo para estar junto.</p></div><nav aria-label="Navegação do rodapé"><a href="#secao-cardapio">Cardápio</a><a href="#nosso-jeito">Nosso jeito</a><button class="text-button login-trigger" data-open="acesso-dialog" type="button">Acesso da equipe ↗</button></nav><div class="footer-bottom"><span>© Fornatta. Feita para compartilhar.</span><span>Com carinho, até a última fatia. ♡</span></div></footer>
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <span class="brand brand-light"><small>PIZZARIA</small>Fornatta</span>
+        <span>Pizza e refri · Entrega ou retirada · Pagamento só na hora</span>
+        <a href="equipe.html">Área da equipe →</a>
+    </div>
+</footer>
 
-<!-- ===== Janela de login / cadastro (duas abas) ===== -->
-<dialog id="acesso-dialog" class="app-dialog access-dialog" aria-labelledby="access-title">
-    <button class="dialog-close" data-close type="button" aria-label="Fechar acesso">×</button>
-    <section id="secao-acesso">
-        <p class="eyebrow">BEM-VINDO À MESA</p>
-        <h2 id="access-title">Bom te ver <em>por aqui.</em></h2>
+<!-- Sacola flutuante -->
+<button class="fab-cart" type="button" data-open="carrinho-dialog" aria-label="Abrir sacola">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l1 13H5L6 7Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+    <span class="cart-count" data-cart-count>0</span>
+</button>
 
-        <div class="access-tabs" role="tablist" aria-label="Entrar ou criar conta">
-            <button type="button" role="tab" id="aba-entrar" data-aba="entrar" aria-selected="true" aria-controls="form-login">Entrar</button>
-            <button type="button" role="tab" id="aba-cadastro" data-aba="cadastro" aria-selected="false" aria-controls="form-cadastro">Criar conta</button>
-            <span class="tab-indicator" aria-hidden="true"></span>
-        </div>
-
-        <!-- Aba 1: entrar -->
-        <form id="form-login" role="tabpanel" aria-labelledby="aba-entrar" novalidate>
-            <p class="form-intro">Cliente entra com o <strong>e-mail ou telefone</strong>. A equipe entra com o usuário.</p>
-            <div class="field">
-                <label for="login-usuario">E-mail, telefone ou usuário</label>
-                <input id="login-usuario" placeholder="nome@gmail.com ou (18) 99999-1234" autocomplete="username" autocapitalize="off" required>
-            </div>
-            <div class="field">
-                <label for="login-senha">Senha</label>
-                <div class="password-field">
-                    <input id="login-senha" type="password" placeholder="Sua senha" autocomplete="current-password" required>
-                    <button type="button" class="show-pass" aria-label="Mostrar senha">Mostrar</button>
-                </div>
-            </div>
-            <p class="form-error" role="alert" hidden></p>
-            <button class="button primary" type="submit">Entrar <span aria-hidden="true">↗</span></button>
-            <p class="switch-note">Ainda não tem conta? <button type="button" class="link-button" data-aba="cadastro">Criar agora</button></p>
-            <div class="demo-accounts">
-                <strong>Contas de teste</strong>
-                <span>Equipe (acesso total): <code>admin</code> / <code>admin</code></span>
-                <span>Cliente: <code>cliente@fornatta.com</code> / <code>cliente123</code></span>
-            </div>
-        </form>
-
-        <!-- Aba 2: criar conta -->
-        <form id="form-cadastro" role="tabpanel" aria-labelledby="aba-cadastro" novalidate hidden>
-            <p class="form-intro">Leva 20 segundos. Depois você <strong>já entra direto</strong> e pode pedir.</p>
-            <div class="field">
-                <label for="cadastro-nome">Seu nome</label>
-                <input id="cadastro-nome" name="nome" placeholder="Como podemos te chamar?" autocomplete="name" required>
-            </div>
-            <div class="field">
-                <label for="cadastro-email">E-mail</label>
-                <input id="cadastro-email" name="email" type="email" inputmode="email" placeholder="nome@gmail.com" autocomplete="email" autocapitalize="off" required>
-            </div>
-            <div class="field">
-                <label for="cadastro-telefone">Telefone com DDD</label>
-                <input id="cadastro-telefone" name="telefone" type="tel" inputmode="tel" placeholder="(18) 99999-1234" autocomplete="tel" required>
-                <small class="hint">Pode digitar com +55. Você entra com o e-mail ou com o telefone.</small>
-            </div>
-            <div class="field">
-                <label for="cadastro-senha">Crie uma senha</label>
-                <div class="password-field">
-                    <input id="cadastro-senha" name="senha" type="password" placeholder="Mínimo de 8 caracteres" autocomplete="new-password" required>
-                    <button type="button" class="show-pass" aria-label="Mostrar senha">Mostrar</button>
-                </div>
-                <div class="strength" aria-hidden="true"><span id="forca-barra"></span></div>
-                <small class="hint" id="forca-texto">Mínimo de 8 caracteres.</small>
-            </div>
-            <div class="field">
-                <label for="cadastro-confirmacao">Repita a senha</label>
-                <div class="password-field">
-                    <input id="cadastro-confirmacao" name="confirmacao" type="password" placeholder="Digite a mesma senha" autocomplete="new-password" required>
-                    <button type="button" class="show-pass" aria-label="Mostrar senha">Mostrar</button>
-                </div>
-                <small class="hint" id="confere-texto"></small>
-            </div>
-            <p class="form-error" role="alert" hidden></p>
-            <button class="button primary" type="submit">Criar conta e entrar <span aria-hidden="true">↗</span></button>
-            <p class="switch-note">Já tem conta? <button type="button" class="link-button" data-aba="entrar">Entrar</button></p>
-        </form>
-    </section>
-</dialog>
-
-<!-- ===== Janela do pedido do cliente ===== -->
-<dialog id="carrinho-dialog" class="app-dialog cart-dialog" aria-labelledby="cart-title">
-    <button class="dialog-close" data-close type="button" aria-label="Fechar pedido">×</button>
-    <p class="eyebrow">SEU MOMENTO FORNATTA</p>
-    <h2 id="cart-title">Uma boa <em>escolha.</em></h2>
-
-    <div id="cart-guest"><p>Entre na sua conta para montar seu pedido.</p><button class="button primary" data-open="acesso-dialog" type="button">Entrar e pedir ↗</button></div>
-
-    <section data-perfis="cliente" hidden>
-        <ul id="lista-carrinho" class="cart-list"></ul>
-        <p class="total">Total <span>R$ <span id="carrinho-total">0,00</span></span></p>
-
-        <form id="form-pedido">
-            <fieldset class="choice-group">
-                <legend>Como você quer receber?</legend>
-                <label><input type="radio" name="tipo" value="entrega" checked><span>Entrega em casa</span></label>
-                <label><input type="radio" name="tipo" value="retirada"><span>Retirar no balcão</span></label>
-            </fieldset>
-
-            <div id="campo-endereco" class="field">
-                <label for="entrega-endereco">Onde vamos entregar?</label>
-                <input id="entrega-endereco" placeholder="Rua, número, bairro e complemento" autocomplete="street-address">
-            </div>
-
-            <fieldset class="choice-group">
-                <legend>Como vai pagar? <small id="onde-paga">Na entrega, direto ao entregador.</small></legend>
-                <label><input type="radio" name="pagamento" value="dinheiro" checked><span>Dinheiro</span></label>
-                <label><input type="radio" name="pagamento" value="cartao_debito"><span>Débito</span></label>
-                <label><input type="radio" name="pagamento" value="cartao_credito"><span>Crédito</span></label>
-            </fieldset>
-
-            <div id="campo-troco" class="field">
-                <label for="troco">Troco para quanto? <small>(opcional)</small></label>
-                <input id="troco" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ex.: 100">
-            </div>
-
-            <div class="field">
-                <label for="observacao">Alguma observação? <small>(opcional)</small></label>
-                <input id="observacao" maxlength="140" placeholder="Ex.: sem cebola, interfone 12">
-            </div>
-
-            <button class="button primary" type="submit">Confirmar pedido <span aria-hidden="true">↗</span></button>
-        </form>
-        <p class="aviso pay-note">Nada de pagamento online. Você só paga quando a pizza chegar até você.</p>
-
-        <div class="orders-heading"><h3>Meus pedidos</h3><span class="live-label"><span class="live-dot" aria-hidden="true"></span>ao vivo</span></div>
-        <div id="lista-meus-pedidos"></div>
-    </section>
-</dialog>
-
-<!-- Upgrade: rastreador do pedido ao vivo (aparece quando o cliente tem pedido em andamento) -->
+<!-- Rastreador do pedido ao vivo -->
 <button id="rastreador" class="tracker" type="button" data-open="carrinho-dialog" hidden>
     <span class="tracker-icon" aria-hidden="true">◔</span>
     <span class="tracker-text"><strong id="rastreador-titulo"></strong><small id="rastreador-status"></small></span>
     <span class="tracker-bar" aria-hidden="true"><span id="rastreador-progresso"></span></span>
 </button>
 
-<div id="notificacoes" class="notifications" role="status" aria-live="polite" aria-atomic="true"></div>
-<noscript><p class="noscript-note">Ative o JavaScript para consultar o cardápio e fazer pedidos.</p></noscript>
+<!-- ===== Janela: entrar / criar conta ===== -->
+<dialog id="acesso-dialog" class="sheet" aria-labelledby="access-title">
+    <button class="sheet-close" data-close type="button" aria-label="Fechar">×</button>
+    <p class="eyebrow eyebrow-red">BEM-VINDO À FORNATTA</p>
+    <h2 id="access-title">Bom te ver <em>por aqui.</em></h2>
+
+    <div class="tabs" role="tablist" aria-label="Entrar ou criar conta" data-aba="entrar">
+        <button type="button" role="tab" id="aba-entrar" data-aba="entrar" aria-selected="true" aria-controls="form-login">Entrar</button>
+        <button type="button" role="tab" id="aba-cadastro" data-aba="cadastro" aria-selected="false" aria-controls="form-cadastro">Criar conta</button>
+        <span class="tab-indicator" aria-hidden="true"></span>
+    </div>
+
+    <form id="form-login" class="form" role="tabpanel" aria-labelledby="aba-entrar" novalidate>
+        <div class="field">
+            <label for="login-usuario">E-mail, telefone ou usuário</label>
+            <input id="login-usuario" placeholder="nome@gmail.com ou (18) 99999-1234" autocomplete="username" autocapitalize="off">
+        </div>
+        <div class="field">
+            <label for="login-senha">Senha</label>
+            <div class="password-field">
+                <input id="login-senha" type="password" placeholder="Sua senha" autocomplete="current-password">
+                <button type="button" class="show-pass" aria-label="Mostrar senha">Mostrar</button>
+            </div>
+        </div>
+        <p class="form-error" role="alert" hidden></p>
+        <button class="btn btn-red btn-block" type="submit">Entrar ↗</button>
+        <div class="demo-box">
+            <strong>Contas de teste</strong>
+            <span>Equipe (acesso total): <code>admin</code> / <code>admin</code></span>
+            <span>Cliente: <code>cliente@fornatta.com</code> / <code>cliente123</code></span>
+        </div>
+    </form>
+
+    <form id="form-cadastro" class="form" role="tabpanel" aria-labelledby="aba-cadastro" novalidate hidden>
+        <div class="field">
+            <label for="cadastro-nome">Seu nome</label>
+            <input id="cadastro-nome" name="nome" placeholder="Como podemos te chamar?" autocomplete="name">
+        </div>
+        <div class="field">
+            <label for="cadastro-email">E-mail</label>
+            <input id="cadastro-email" name="email" type="email" placeholder="nome@gmail.com" autocomplete="email" autocapitalize="off">
+        </div>
+        <div class="field">
+            <label for="cadastro-telefone">Telefone com DDD</label>
+            <input id="cadastro-telefone" name="telefone" type="tel" inputmode="tel" placeholder="(18) 99999-1234" autocomplete="tel">
+            <small class="hint">Pode digitar com +55.</small>
+        </div>
+        <div class="field">
+            <label for="cadastro-senha">Crie uma senha</label>
+            <div class="password-field">
+                <input id="cadastro-senha" name="senha" type="password" placeholder="Mínimo de 8 caracteres" autocomplete="new-password">
+                <button type="button" class="show-pass" aria-label="Mostrar senha">Mostrar</button>
+            </div>
+            <div class="strength" aria-hidden="true"><span id="forca-barra"></span></div>
+            <small class="hint" id="forca-texto">Mínimo de 8 caracteres.</small>
+        </div>
+        <div class="field">
+            <label for="cadastro-confirmacao">Repita a senha</label>
+            <div class="password-field">
+                <input id="cadastro-confirmacao" name="confirmacao" type="password" placeholder="Digite a mesma senha" autocomplete="new-password">
+                <button type="button" class="show-pass" aria-label="Mostrar senha">Mostrar</button>
+            </div>
+            <small class="hint" id="confere-texto"></small>
+        </div>
+        <p class="form-error" role="alert" hidden></p>
+        <button class="btn btn-red btn-block" type="submit">Criar conta e entrar ↗</button>
+    </form>
+</dialog>
+
+<!-- ===== Janela: sacola e meus pedidos ===== -->
+<dialog id="carrinho-dialog" class="sheet sheet-wide" aria-labelledby="cart-title">
+    <button class="sheet-close" data-close type="button" aria-label="Fechar">×</button>
+    <p class="eyebrow eyebrow-red">SUA SACOLA</p>
+    <h2 id="cart-title">Quase lá. <em>Bora pedir?</em></h2>
+
+    <div id="cart-guest" class="guest-box">
+        <p>Entre na sua conta para fechar o pedido. Leva 20 segundos.</p>
+        <button class="btn btn-red" type="button" data-open="acesso-dialog">Entrar ou criar conta ↗</button>
+    </div>
+
+    <ul id="lista-carrinho" class="cart-list"></ul>
+    <p class="total-line">Total <strong>R$ <span id="carrinho-total">0,00</span></strong></p>
+
+    <form id="form-pedido" class="form" hidden>
+        <fieldset class="choices">
+            <legend>Como você quer receber?</legend>
+            <label><input type="radio" name="tipo" value="entrega" checked><span>Entrega em casa</span></label>
+            <label><input type="radio" name="tipo" value="retirada"><span>Retirar no balcão</span></label>
+        </fieldset>
+        <div id="campo-endereco" class="field">
+            <label for="entrega-endereco">Onde vamos entregar?</label>
+            <input id="entrega-endereco" placeholder="Rua, número, bairro e complemento" autocomplete="street-address">
+        </div>
+        <fieldset class="choices">
+            <legend>Como vai pagar? <small id="onde-paga">Na entrega, direto ao entregador.</small></legend>
+            <label><input type="radio" name="pagamento" value="dinheiro" checked><span>Dinheiro</span></label>
+            <label><input type="radio" name="pagamento" value="cartao_debito"><span>Débito</span></label>
+            <label><input type="radio" name="pagamento" value="cartao_credito"><span>Crédito</span></label>
+        </fieldset>
+        <div id="campo-troco" class="field">
+            <label for="troco">Troco para quanto? <small>(opcional)</small></label>
+            <input id="troco" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ex.: 100">
+        </div>
+        <div class="field">
+            <label for="observacao">Observação <small>(opcional)</small></label>
+            <input id="observacao" maxlength="140" placeholder="Ex.: sem cebola, interfone 12">
+        </div>
+        <button class="btn btn-red btn-block" type="submit">Confirmar pedido ↗</button>
+        <p class="pay-note">Nada de pagamento online. Você só paga quando a pizza chegar até você.</p>
+    </form>
+
+    <section id="secao-meus-pedidos" hidden>
+        <div class="orders-head"><h3>Meus pedidos</h3><span class="live"><span class="live-dot" aria-hidden="true"></span>ao vivo</span></div>
+        <div id="lista-meus-pedidos"></div>
+    </section>
+</dialog>
+
+<div id="notificacoes" class="toast" role="status" aria-live="polite"></div>
+<noscript><p class="state">Ative o JavaScript para ver o cardápio e pedir.</p></noscript>
 </body>
 </html>

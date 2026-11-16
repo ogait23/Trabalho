@@ -45,13 +45,12 @@ def criar_usuario(dados, login, nome, perfil, variavel_ambiente, senha_demonstra
 
 
 def montar_cardapio(dados):
+    # O cardápio da Fornatta é só pizza e refrigerante.
     tradicional = Categoria("Pizzas Tradicionais")
     especial = Categoria("Pizzas Especiais")
     doce = Categoria("Pizzas Doces")
-    bebida = Categoria("Bebidas")
-    porcao = Categoria("Porções")
-    sobremesa = Categoria("Sobremesas")
-    dados.categorias.extend([tradicional, especial, doce, bebida, porcao, sobremesa])
+    refri = Categoria("Refrigerantes")
+    dados.categorias.extend([tradicional, especial, doce, refri])
 
     # Pizzas: tamanho grande (35 cm, 8 fatias)
     criar_produto(dados, "Margherita", 42.0, tradicional, "Molho de tomate, mussarela, tomate fresco e manjericão.", 20, 5)
@@ -71,18 +70,9 @@ def montar_cardapio(dados):
     criar_produto(dados, "Banana com Canela", 44.0, doce, "Banana, açúcar, canela e mussarela.", 10, 3)
     criar_produto(dados, "Romeu e Julieta", 46.0, doce, "Mussarela e goiabada cremosa.", 10, 3)
 
-    criar_produto(dados, "Refrigerante 2L", 14.0, bebida, "Coca-Cola, Guaraná ou Fanta.", 30, 10)
-    criar_produto(dados, "Refrigerante Lata", 6.0, bebida, "Lata de 350 ml.", 48, 12)
-    criar_produto(dados, "Suco Natural de Laranja", 10.0, bebida, "Copo de 400 ml, sem adição de açúcar.", 20, 6)
-    criar_produto(dados, "Água Mineral", 5.0, bebida, "Garrafa de 500 ml, com ou sem gás.", 40, 10)
-    criar_produto(dados, "Cerveja Long Neck", 12.0, bebida, "Long neck de 330 ml. Venda somente para maiores de 18 anos.", 24, 6)
-
-    criar_produto(dados, "Pão de Alho", 18.0, porcao, "Seis unidades com alho assado e ervas.", 25, 8)
-    criar_produto(dados, "Batata Frita", 28.0, porcao, "Porção de 400 g com cheddar e bacon à parte.", 20, 5)
-    criar_produto(dados, "Bruschetta", 24.0, porcao, "Quatro fatias com tomate, manjericão e azeite.", 20, 5)
-
-    criar_produto(dados, "Petit Gâteau", 24.0, sobremesa, "Bolo de chocolate com sorvete de creme.", 15, 4)
-    criar_produto(dados, "Pudim", 14.0, sobremesa, "Pudim de leite condensado com calda de caramelo.", 15, 4)
+    criar_produto(dados, "Refrigerante 2L", 14.0, refri, "Coca-Cola, Guaraná ou Fanta. Gelado.", 30, 10)
+    criar_produto(dados, "Refrigerante 600 ml", 8.0, refri, "Coca-Cola, Guaraná ou Fanta.", 30, 10)
+    criar_produto(dados, "Refrigerante Lata", 6.0, refri, "Lata de 350 ml. Coca-Cola, Guaraná ou Fanta.", 48, 12)
 
 
 def montar_dados_iniciais():

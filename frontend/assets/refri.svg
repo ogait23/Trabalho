@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-label="Garrafa e lata de refrigerante">
+  <defs>
+    <radialGradient id="fundo" cx="50%" cy="45%" r="70%">
+      <stop offset="0" stop-color="#fff1d6"/>
+      <stop offset="1" stop-color="#f6b62b"/>
+    </radialGradient>
+    <linearGradient id="vidro" x1="0" x2="1">
+      <stop offset="0" stop-color="#7a1a14"/>
+      <stop offset=".45" stop-color="#b8231d"/>
+      <stop offset="1" stop-color="#5e130f"/>
+    </linearGradient>
+    <linearGradient id="lata" x1="0" x2="1">
+      <stop offset="0" stop-color="#b8231d"/>
+      <stop offset=".4" stop-color="#ef4a3f"/>
+      <stop offset="1" stop-color="#8f1b16"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#fundo)"/>
+  <circle cx="120" cy="80" r="10" fill="#fff" opacity=".6"/>
+  <circle cx="480" cy="110" r="7" fill="#fff" opacity=".6"/>
+  <circle cx="455" cy="70" r="4" fill="#fff" opacity=".6"/>
+  <ellipse cx="300" cy="352" rx="190" ry="18" fill="#7a4a10" opacity=".25"/>
+  <!-- garrafa -->
+  <path d="M232 60h36v34c0 14 22 30 22 62v178c0 10-8 18-18 18h-44c-10 0-18-8-18-18V156c0-32 22-48 22-62z" fill="url(#vidro)"/>
+  <rect x="228" y="44" width="44" height="22" rx="5" fill="#221e1a"/>
+  <rect x="204" y="190" width="92" height="70" rx="6" fill="#fff8ec"/>
+  <text x="250" y="222" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="20" fill="#b8231d">REFRI</text>
+  <text x="250" y="246" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="14" fill="#221e1a">2 LITROS</text>
+  <path d="M222 120c6-8 10-14 10-26" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".35" fill="none"/>
+  <rect x="216" y="280" width="8" height="46" rx="4" fill="#fff" opacity=".25"/>
+  <!-- lata -->
+  <rect x="326" y="186" width="96" height="160" rx="16" fill="url(#lata)"/>
+  <rect x="332" y="176" width="84" height="16" rx="7" fill="#c9c3b8"/>
+  <rect x="326" y="238" width="96" height="44" fill="#fff8ec"/>
+  <text x="374" y="266" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="18" fill="#b8231d">350 ml</text>
+  <rect x="338" y="200" width="8" height="132" rx="4" fill="#fff" opacity=".28"/>
+  <!-- gotinhas -->
+  <circle cx="404" cy="214" r="4" fill="#fff" opacity=".7"/>
+  <circle cx="356" cy="306" r="3" fill="#fff" opacity=".7"/>
+  <circle cx="276" cy="300" r="3.5" fill="#fff" opacity=".6"/>
+</svg>

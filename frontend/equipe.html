@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#221e1a">
+    <title>Painel da equipe — Fornatta</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="estilo.css">
+    <script src="comum.js" defer></script>
+    <script src="equipe.js" defer></script>
+</head>
+<body class="staff">
+
+<header class="site-header">
+    <div class="header-inner">
+        <a class="brand" href="index.html" aria-label="Voltar para a loja"><small>PIZZARIA</small>Fornatta</a>
+        <nav class="site-nav" aria-label="Navegação">
+            <a href="index.html">Loja</a>
+            <a href="equipe.html" aria-current="page">Painel da equipe</a>
+        </nav>
+        <div class="header-actions">
+            <span id="usuario-chip" class="user-chip" hidden></span>
+            <button id="botao-sair" class="pill pill-ghost" type="button" hidden>Sair</button>
+        </div>
+    </div>
+</header>
+
+<!-- ===== Login da equipe (aparece se ninguém da equipe estiver logado nesta aba) ===== -->
+<main id="tela-login" class="staff-login" hidden>
+    <form id="form-equipe" class="login-card form" novalidate>
+        <p class="eyebrow eyebrow-red">ÁREA DA EQUIPE</p>
+        <h1>Painel da <em>Fornatta</em></h1>
+        <p class="muted">Cozinha, salão, entregas, estoque e caixa num lugar só.</p>
+        <div class="field">
+            <label for="equipe-usuario">Usuário</label>
+            <input id="equipe-usuario" placeholder="admin" autocomplete="username" autocapitalize="off">
+        </div>
+        <div class="field">
+            <label for="equipe-senha">Senha</label>
+            <div class="password-field">
+                <input id="equipe-senha" type="password" placeholder="Sua senha" autocomplete="current-password">
+                <button type="button" class="show-pass" aria-label="Mostrar senha">Mostrar</button>
+            </div>
+        </div>
+        <p class="form-error" role="alert" hidden></p>
+        <button class="btn btn-red btn-block" type="submit">Entrar no painel ↗</button>
+        <div class="demo-box">
+            <strong>Conta de teste</strong>
+            <span>Acesso total: <code>admin</code> / <code>admin</code></span>
+            <span>Só cozinha: <code>cozinha</code> / <code>cozinha@2026</code> · Garçom: <code>carlos</code> / <code>carlos@2026</code></span>
+        </div>
+    </form>
+</main>
+
+<!-- ===== Painel ===== -->
+<div id="tela-painel" hidden>
+    <section class="staff-hero">
+        <div class="container staff-hero-inner">
+            <div>
+                <span class="badge">Painel da equipe</span>
+                <h1>Operação de hoje</h1>
+                <p id="data-hoje" class="staff-date"></p>
+            </div>
+            <div class="staff-refresh">
+                <span class="live"><span class="live-dot" aria-hidden="true"></span><span id="ultima-atualizacao">Atualiza sozinho</span></span>
+                <button id="atualizar-agora" class="pill pill-light" type="button">Atualizar agora</button>
+            </div>
+        </div>
+    </section>
+
+    <main class="container staff-main">
+        <!-- Números do dia -->
+        <div class="stats" id="stats"></div>
+
+        <!-- Abas (cada perfil vê só as suas) -->
+        <nav class="staff-tabs" role="tablist" aria-label="Áreas do painel">
+            <button type="button" role="tab" data-tab="cozinha" data-perfis="cozinha">Cozinha <b class="tab-count" id="conta-cozinha">0</b></button>
+            <button type="button" role="tab" data-tab="salao" data-perfis="garcom">Salão</button>
+            <button type="button" role="tab" data-tab="clientes" data-perfis="garcom">Entregas e balcão <b class="tab-count" id="conta-clientes">0</b></button>
+            <button type="button" role="tab" data-tab="estoque" data-perfis="cozinha">Estoque</button>
+            <button type="button" role="tab" data-tab="caixa" data-perfis="gerente">Caixa</button>
+        </nav>
+
+        <!-- Cozinha -->
+        <section class="tab-panel" id="painel-cozinha" role="tabpanel" hidden>
+            <div class="panel-head"><div><h2>Fila da cozinha</h2><p class="muted">Do mais antigo para o mais novo. Clique em <b>Pronto</b> quando sair do forno.</p></div></div>
+            <div id="lista-cozinha" class="kitchen-grid"></div>
+        </section>
+
+        <!-- Salão -->
+        <section class="tab-panel" id="painel-salao" role="tabpanel" hidden>
+            <div class="panel-head"><div><h2>Mesas</h2><p class="muted">Verde = livre · Vermelho = ocupada. Clique numa mesa para abrir ou ver o pedido.</p></div></div>
+            <div class="salao-layout">
+                <div id="lista-mesas" class="tables-grid"></div>
+                <aside id="painel-mesa" class="table-panel">
+                    <p class="muted">Escolha uma mesa ao lado.</p>
+                </aside>
+            </div>
+        </section>
+
+        <!-- Entregas e retiradas -->
+        <section class="tab-panel" id="painel-clientes" role="tabpanel" hidden>
+            <div class="panel-head"><div><h2>Entregas e retiradas no balcão</h2><p class="muted">Quando a pizza estiver pronta, receba o pagamento na hora e finalize.</p></div></div>
+            <div id="lista-pedidos-clientes" class="ticket-grid"></div>
+        </section>
+
+        <!-- Estoque -->
+        <section class="tab-panel" id="painel-estoque" role="tabpanel" hidden>
+            <div class="panel-head"><div><h2>Estoque</h2><p class="muted">A barra fica vermelha quando chega no mínimo.</p></div></div>
+            <div id="lista-estoque" class="stock-grid"></div>
+        </section>
+
+        <!-- Caixa -->
+        <section class="tab-panel" id="painel-caixa" role="tabpanel" hidden>
+            <div class="cash-card">
+                <p class="eyebrow">CAIXA DE HOJE</p>
+                <p class="cash-value">R$ <span id="caixa-total">0,00</span></p>
+                <p class="muted-light">Só pagamentos presenciais: mesa, entrega e balcão.</p>
+                <button id="botao-fechar-caixa" class="btn btn-yellow" type="button">Fechar caixa</button>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div id="notificacoes" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

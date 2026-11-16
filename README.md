@@ -31,9 +31,10 @@ categorias e acesso por janelas de login e pedido. Os produtos e preços são
 carregados da API existente; cadastro, entrega e áreas da equipe continuam
 integrados ao Flask. Abra pelo servidor acima para usar essas funções.
 
-- `frontend/estilo.css`: identidade visual e layouts para celular, tablet e desktop.
-- `frontend/landing.js`: navegação móvel, janelas acessíveis, notificações e motion.
-- `frontend/script.js`: sessão, cardápio, carrinho e operações da pizzaria.
+- `frontend/index.html` + `frontend/loja.js`: loja do cliente (cardápio de pizza e refri, sacola, entrar/criar conta, pedidos ao vivo).
+- `frontend/equipe.html` + `frontend/equipe.js`: painel da equipe com abas Cozinha, Salão, Entregas e balcão, Estoque e Caixa.
+- `frontend/comum.js`: o que as duas páginas usam (API, login por aba, avisos, janelas).
+- `frontend/estilo.css`: visual da loja e do painel, para celular e computador.
 - `frontend/assets/`: imagens locais e ícone; não há dependência de CDN em execução.
 
 As imagens ganham perspectiva com o ponteiro no computador e com a rolagem no
