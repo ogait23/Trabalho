@@ -2287,3 +2287,164 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
     .timeline { font-size:9px }
     .ops-refresh { flex-wrap:wrap; margin-top:15px }
 }
+
+/* ---------- Janela de entrar / criar conta ---------- */
+.access-dialog { width:min(440px,calc(100% - 28px)) }
+.access-dialog h2 { margin-bottom:22px }
+
+/* Abas com um "pílula" que desliza para o lado escolhido */
+.access-tabs {
+    position:relative;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    padding:4px;
+    border-radius:50px;
+    background:#e9e4d6
+}
+
+.access-tabs button {
+    position:relative;
+    z-index:1;
+    padding:11px;
+    border-radius:50px;
+    background:none;
+    color:var(--muted);
+    font-size:13px;
+    font-weight:600;
+    transition:color .25s
+}
+
+.access-tabs button[aria-selected=true] { color:var(--paper) }
+
+.tab-indicator {
+    position:absolute;
+    top:4px;
+    bottom:4px;
+    left:4px;
+    width:calc(50% - 4px);
+    border-radius:50px;
+    background:var(--red);
+    box-shadow:0 4px 12px #a62e2640;
+    transition:translate .35s var(--ease)
+}
+
+.access-tabs[data-aba=cadastro] .tab-indicator { translate:100% 0 }
+
+.access-dialog form {
+    margin:20px 0 0;
+    gap:14px;
+    animation:entrar .35s var(--ease) backwards
+}
+
+.form-intro {
+    margin:0;
+    font-size:13px;
+    color:var(--muted)
+}
+
+.access-dialog .field label { font-size:12px }
+.access-dialog .field input { margin:0 }
+
+.app-dialog input[aria-invalid=true] {
+    border-color:var(--red);
+    background:#fff5f3
+}
+
+.app-dialog input:focus {
+    outline:none;
+    border-color:var(--olive);
+    box-shadow:0 0 0 4px #344b3820
+}
+
+.password-field { position:relative }
+.password-field input { padding-right:80px }
+
+.show-pass {
+    position:absolute;
+    right:6px;
+    top:50%;
+    translate:0 -50%;
+    padding:7px 10px;
+    border-radius:4px;
+    background:none;
+    color:var(--olive);
+    font-size:11px;
+    font-weight:600
+}
+
+.show-pass:hover { background:#e9ecdf }
+
+.hint { font-size:11px; color:var(--muted) }
+.demo-accounts {
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    padding:12px 14px;
+    border:1px dashed #bdb9a8;
+    border-radius:6px;
+    font-size:12px;
+    color:var(--muted)
+}
+
+.demo-accounts strong { color:var(--ink); font-size:12px }
+.demo-accounts code { color:var(--red-dark); font-weight:600 }
+
+.hint.ok { color:var(--ok); font-weight:600 }
+.hint.ruim { color:var(--red); font-weight:600 }
+
+.strength {
+    height:5px;
+    border-radius:5px;
+    background:#e6e1d3;
+    overflow:hidden
+}
+
+.strength span {
+    display:block;
+    height:100%;
+    width:0;
+    border-radius:5px;
+    transition:width .3s var(--ease),background .3s
+}
+
+.strength span[data-nivel="0"] { width:20%; background:var(--red) }
+.strength span[data-nivel="1"] { width:50%; background:var(--warn) }
+.strength span[data-nivel="2"] { width:78%; background:var(--ok) }
+.strength span[data-nivel="3"] { width:100%; background:var(--olive) }
+
+.form-error {
+    margin:0;
+    padding:11px 14px;
+    border-radius:6px;
+    border-left:4px solid var(--red);
+    background:#fbe9e5;
+    color:var(--red-dark);
+    font-size:13px;
+    font-weight:600
+}
+
+.form-error.shake { animation:tremer .4s }
+
+@keyframes tremer {
+    20%,60% { translate:-6px 0 }
+    40%,80% { translate:6px 0 }
+}
+
+.access-dialog .button { justify-content:center; gap:14px }
+
+.switch-note {
+    margin:2px 0 0;
+    text-align:center;
+    font-size:12px;
+    color:var(--muted)
+}
+
+.link-button {
+    padding:0;
+    background:none;
+    color:var(--red);
+    font-size:12px;
+    font-weight:600;
+    text-decoration:underline;
+    text-underline-offset:3px
+}

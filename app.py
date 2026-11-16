@@ -25,15 +25,51 @@ MAX_TENTATIVAS = 5
 BLOQUEIO_SEGUNDOS = 300
 tentativas = {}
 
+# Login por aba: cada aba do navegador recebe o próprio token.
+# Assim dá para deixar uma aba como cliente e outra como admin ao mesmo tempo.
+SESSAO_SEGUNDOS = 8 * 3600
+sessoes = {}  # token -> (login do usuário, horário em que expira)
+
 
 # ---------- Segurança ----------
-# Nível 1: autenticação (senha com hash, sessão com expiração, bloqueio após 5 erros)
+# Nível 1: autenticação (senha com hash, token por aba que expira em 8 h, bloqueio após 5 erros)
 # Nível 2: autorização por perfil (cliente, garçom, cozinha, gerente)
 # Nível 3: proteção de requisições (token CSRF em todo POST, cookie Strict)
 # Nível 4: proteção das respostas (cabeçalhos de segurança, sem cache da API)
 
 def usuario_logado():
-    return dados.usuarios.get(session.get("login"))
+    """Descobre quem está usando esta aba pelo cabeçalho X-Sessao."""
+    token = request.headers.get("X-Sessao", "")
+    login, expira_em = sessoes.get(token, (None, 0))
+    if expira_em < time.time():
+        sessoes.pop(token, None)
+        return None
+    return dados.usuarios.get(login)
+
+
+def normalizar_telefone(texto):
+    """Deixa só os números e tira o +55. Ex.: '+55 (67) 99999-1234' -> '67999991234'."""
+    numeros = re.sub(r"\D", "", texto)
+    if len(numeros) in (12, 13) and numeros.startswith("55"):
+        numeros = numeros[2:]
+    return numeros
+
+
+def encontrar_usuario(login):
+    """Aceita e-mail, telefone (com ou sem formatação) ou o usuário da equipe."""
+    login = login.strip().lower()
+    if "@" in login:
+        return next((u for u in dados.usuarios.values() if u.email == login), None)
+    if not re.search(r"[a-z]", login):
+        login = normalizar_telefone(login)
+    return dados.usuarios.get(login)
+
+
+def iniciar_sessao(usuario):
+    """Cria um token novo para esta aba e devolve o que o navegador precisa guardar."""
+    token = secrets.token_hex(32)
+    sessoes[token] = (usuario.login, time.time() + SESSAO_SEGUNDOS)
+    return {"token": token, "csrf": session["csrf"], "usuario": usuario_para_dict(usuario)}
 
 
 def exige(*perfis):
@@ -239,23 +275,19 @@ def entrar():
     if bloqueado_ate:
         quantidade = 0
 
-    usuario = dados.usuarios.get(login)
+    usuario = encontrar_usuario(login)
     if usuario is None or not usuario.verificarSenha(str(corpo.get("senha", ""))):
         quantidade += 1
         tentativas[chave] = (quantidade, agora + BLOQUEIO_SEGUNDOS if quantidade >= MAX_TENTATIVAS else 0)
         return jsonify({"erro": "Usuário ou senha incorretos."}), 401
 
     tentativas.pop(chave, None)
-    session.clear()
-    session["csrf"] = secrets.token_hex(16)
-    session["login"] = usuario.login
-    session.permanent = True
-    return jsonify({"csrf": session["csrf"], "usuario": usuario_para_dict(usuario)})
+    return jsonify(iniciar_sessao(usuario))
 
 
 @app.route("/api/sair", methods=["POST"])
 def sair():
-    session.clear()
+    sessoes.pop(request.headers.get("X-Sessao", ""), None)  # só esta aba sai; as outras continuam
     return jsonify({"ok": True})
 
 
@@ -263,20 +295,30 @@ def sair():
 def cadastrar_cliente():
     corpo = corpo_json()
     nome = str(corpo.get("nome", "")).strip()
-    telefone = re.sub(r"\D", "", str(corpo.get("telefone", "")))
+    email = str(corpo.get("email", "")).strip().lower()
+    telefone = normalizar_telefone(str(corpo.get("telefone", "")))
     senha = str(corpo.get("senha", ""))
+    confirmacao = str(corpo.get("confirmacao", ""))
 
+    # "campo" diz ao navegador em qual campo mostrar o erro
     if len(nome) < 3:
-        return jsonify({"erro": "Informe seu nome."}), 400
+        return jsonify({"erro": "Digite seu nome (pelo menos 3 letras).", "campo": "nome"}), 400
+    if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+        return jsonify({"erro": "Digite um e-mail válido, ex.: nome@gmail.com.", "campo": "email"}), 400
     if len(telefone) not in (10, 11):
-        return jsonify({"erro": "Informe o telefone com DDD."}), 400
+        return jsonify({"erro": "Telefone com DDD, ex.: (18) 99764-0335.", "campo": "telefone"}), 400
     if len(senha) < 8:
-        return jsonify({"erro": "A senha precisa ter pelo menos 8 caracteres."}), 400
+        return jsonify({"erro": "A senha precisa ter pelo menos 8 caracteres.", "campo": "senha"}), 400
+    if senha != confirmacao:
+        return jsonify({"erro": "As senhas não são iguais.", "campo": "confirmacao"}), 400
+    if encontrar_usuario(email):
+        return jsonify({"erro": "Este e-mail já tem conta. Use a aba Entrar.", "campo": "email"}), 400
     if telefone in dados.usuarios:
-        return jsonify({"erro": "Este telefone já está cadastrado."}), 400
+        return jsonify({"erro": "Este telefone já tem conta. Use a aba Entrar.", "campo": "telefone"}), 400
 
-    dados.usuarios[telefone] = Usuario(telefone, nome, senha, "cliente", telefone)
-    return jsonify({"ok": True}), 201
+    usuario = Usuario(telefone, nome, senha, "cliente", telefone, email)
+    dados.usuarios[telefone] = usuario
+    return jsonify(iniciar_sessao(usuario)), 201  # já entra direto depois de criar a conta
 
 
 # ---------- Cardápio (público) ----------

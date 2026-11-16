@@ -8,7 +8,22 @@
 const BASE = "/api";
 const INTERVALO_AO_VIVO = 10000; // de quanto em quanto tempo (ms) a página pergunta o status
 
+// O token do login fica no sessionStorage, que é SEPARADO em cada aba.
+// Por isso dá para ter uma aba como cliente e outra como admin ao mesmo tempo.
+function lerToken() {
+    try { return sessionStorage.getItem("fornatta-token") || ""; } catch (erro) { return ""; }
+}
+
+function salvarToken(token) {
+    estado.token = token;
+    try {
+        if (token) sessionStorage.setItem("fornatta-token", token);
+        else sessionStorage.removeItem("fornatta-token");
+    } catch (erro) { /* navegador bloqueou o armazenamento: o login vale só até recarregar */ }
+}
+
 const estado = {
+    token: lerToken(),
     usuario: null,
     csrf: "",
     carrinho: [],          // [{ produto, quantidade }]
@@ -36,7 +51,7 @@ const NOMES_PAGAMENTO = { dinheiro: "Dinheiro", cartao_debito: "Cartão de débi
 
 // Faz a chamada para a API. GET quando não tem corpo, POST quando tem.
 async function requisitar(caminho, corpo) {
-    const opcoes = { headers: { "X-CSRF-Token": estado.csrf } };
+    const opcoes = { headers: { "X-CSRF-Token": estado.csrf, "X-Sessao": estado.token } };
     if (corpo !== undefined) {
         opcoes.method = "POST";
         opcoes.headers["Content-Type"] = "application/json";
@@ -48,6 +63,7 @@ async function requisitar(caminho, corpo) {
         if (resposta.status === 401 && estado.usuario) {
             // A sessão expirou no servidor: volta para o modo visitante
             estado.usuario = null;
+            salvarToken("");
             estado.carrinho = [];
             await carregarSessao();
             await atualizarTela();
@@ -125,41 +141,128 @@ async function carregarSessao() {
     estado.usuario = sessao.usuario;
 }
 
-document.getElementById("form-login").addEventListener("submit", acaoSegura(async () => {
-    const resposta = await requisitar("/login", {
-        login: document.getElementById("login-usuario").value,
-        senha: document.getElementById("login-senha").value,
-    });
-    if (resposta.erro) { notificar(resposta.erro); return; }
+// --- Abas "Entrar" e "Criar conta" ---
+function mostrarAba(nome) {
+    const ehCadastro = nome === "cadastro";
+    document.getElementById("form-login").hidden = ehCadastro;
+    document.getElementById("form-cadastro").hidden = !ehCadastro;
+    document.getElementById("aba-entrar").setAttribute("aria-selected", String(!ehCadastro));
+    document.getElementById("aba-cadastro").setAttribute("aria-selected", String(ehCadastro));
+    document.querySelector(".access-tabs").dataset.aba = nome;
+    limparErro(document.getElementById(ehCadastro ? "form-cadastro" : "form-login"));
+    document.getElementById(ehCadastro ? "cadastro-nome" : "login-usuario").focus();
+}
+document.querySelectorAll("#acesso-dialog [data-aba]").forEach(b => b.addEventListener("click", () => mostrarAba(b.dataset.aba)));
 
+// --- Erro mostrado dentro do formulário, perto do campo errado ---
+function mostrarErro(form, mensagem, campo) {
+    const caixa = form.querySelector(".form-error");
+    caixa.textContent = mensagem;
+    caixa.hidden = false;
+    animar(caixa, "shake");
+    const input = campo ? form.querySelector('[name="' + campo + '"]') : null;
+    if (input) { input.setAttribute("aria-invalid", "true"); input.focus(); }
+}
+
+function limparErro(form) {
+    form.querySelector(".form-error").hidden = true;
+    form.querySelectorAll("[aria-invalid]").forEach(i => i.removeAttribute("aria-invalid"));
+}
+document.querySelectorAll("#form-login, #form-cadastro").forEach(f => f.addEventListener("input", () => limparErro(f)));
+
+// --- Máscara de telefone: 67999991234 vira (67) 99999-1234 ---
+function formatarTelefone(texto) {
+    const n = texto.replace(/\D/g, "").replace(/^55(?=\d{10,11}$)/, "").slice(0, 11);
+    if (n.length <= 2) return n.length ? "(" + n : "";
+    if (n.length <= 6) return "(" + n.slice(0, 2) + ") " + n.slice(2);
+    if (n.length <= 10) return "(" + n.slice(0, 2) + ") " + n.slice(2, 6) + "-" + n.slice(6);
+    return "(" + n.slice(0, 2) + ") " + n.slice(2, 7) + "-" + n.slice(7);
+}
+document.getElementById("cadastro-telefone").addEventListener("input", (e) => { e.target.value = formatarTelefone(e.target.value); });
+document.getElementById("login-usuario").addEventListener("input", (e) => {
+    // só formata se parece telefone (sem letras); "gerente" ou "carlos" ficam como estão
+    if (/^[\d\s()+-]+$/.test(e.target.value)) e.target.value = formatarTelefone(e.target.value);
+});
+
+// --- Botão Mostrar/Ocultar senha ---
+document.querySelectorAll(".show-pass").forEach(b => b.addEventListener("click", () => {
+    const input = b.previousElementSibling;
+    const mostrar = input.type === "password";
+    input.type = mostrar ? "text" : "password";
+    b.textContent = mostrar ? "Ocultar" : "Mostrar";
+    b.setAttribute("aria-label", mostrar ? "Ocultar senha" : "Mostrar senha");
+}));
+
+// --- Barrinha de força da senha ---
+document.getElementById("cadastro-senha").addEventListener("input", (e) => {
+    const senha = e.target.value;
+    let nivel = 0; // 0 = curta, 1 = ok, 2 = boa, 3 = forte
+    if (senha.length >= 8) nivel = 1;
+    if (senha.length >= 8 && /\d/.test(senha) && /[a-z]/i.test(senha)) nivel = 2;
+    if (senha.length >= 12 && /\d/.test(senha) && /[^a-z0-9]/i.test(senha)) nivel = 3;
+    const textos = ["Faltam " + Math.max(0, 8 - senha.length) + " caracteres.", "Ok. Misture letras e números para melhorar.", "Boa senha!", "Senha forte!"];
+    document.getElementById("forca-barra").dataset.nivel = senha ? nivel : "";
+    document.getElementById("forca-texto").textContent = senha ? textos[nivel] : "Mínimo de 8 caracteres.";
+    conferirSenhas();
+});
+
+// --- "Repita a senha": avisa na hora se as duas são iguais ---
+function conferirSenhas() {
+    const senha = document.getElementById("cadastro-senha").value;
+    const repetida = document.getElementById("cadastro-confirmacao").value;
+    const aviso = document.getElementById("confere-texto");
+    aviso.className = "hint";
+    if (!repetida) { aviso.textContent = ""; return; }
+    const iguais = senha === repetida;
+    aviso.textContent = iguais ? "✓ As senhas são iguais." : "✗ As senhas ainda não são iguais.";
+    aviso.classList.add(iguais ? "ok" : "ruim");
+}
+document.getElementById("cadastro-confirmacao").addEventListener("input", conferirSenhas);
+
+// Depois de entrar (pelo login ou pelo cadastro)
+async function aposEntrar(resposta) {
+    salvarToken(resposta.token);
     estado.csrf = resposta.csrf;
     estado.usuario = resposta.usuario;
     document.getElementById("form-login").reset();
+    document.getElementById("form-cadastro").reset();
+    document.getElementById("forca-barra").dataset.nivel = "";
     document.getElementById("acesso-dialog").close();
     await atualizarTela();
+    notificar("Olá, " + estado.usuario.nome.split(" ")[0] + "! Que bom te ver.");
     if (estado.usuario.perfil === "cliente" && estado.produtoPendente) adicionarAoCarrinho(estado.produtoPendente);
     estado.produtoPendente = null;
     if (estado.usuario.perfil !== "cliente") document.getElementById("area-operacional").scrollIntoView();
+}
+
+document.getElementById("form-login").addEventListener("submit", acaoSegura(async () => {
+    const form = document.getElementById("form-login");
+    const login = document.getElementById("login-usuario").value.trim();
+    const senha = document.getElementById("login-senha").value;
+    if (!login || !senha) { mostrarErro(form, "Preencha o e-mail (ou telefone) e a senha."); return; }
+
+    const resposta = await requisitar("/login", { login, senha });
+    if (resposta.erro) { mostrarErro(form, resposta.erro); return; }
+    await aposEntrar(resposta);
 }));
 
 document.getElementById("form-cadastro").addEventListener("submit", acaoSegura(async () => {
+    const form = document.getElementById("form-cadastro");
     const resposta = await requisitar("/cadastro", {
         nome: document.getElementById("cadastro-nome").value,
+        email: document.getElementById("cadastro-email").value,
         telefone: document.getElementById("cadastro-telefone").value,
         senha: document.getElementById("cadastro-senha").value,
+        confirmacao: document.getElementById("cadastro-confirmacao").value,
     });
-    if (resposta.erro) { notificar(resposta.erro); return; }
-
-    document.getElementById("login-usuario").value = document.getElementById("cadastro-telefone").value.replace(/\D/g, "");
-    document.getElementById("form-cadastro").reset();
-    document.querySelector("#secao-acesso details").open = false;
-    document.getElementById("login-senha").focus();
-    notificar("Conta criada. Entre com o seu telefone e a senha.");
+    if (resposta.erro) { mostrarErro(form, resposta.erro, resposta.campo); return; }
+    await aposEntrar(resposta);
 }));
 
 document.getElementById("botao-sair").addEventListener("click", acaoSegura(async () => {
     const resposta = await requisitar("/sair", {});
     if (resposta.erro) { notificar(resposta.erro); return; }
+    salvarToken("");
     estado.carrinho = [];
     estado.pedidoAtual = null;
     estado.statusConhecidos = {};

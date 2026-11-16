@@ -137,15 +137,36 @@ O nome de cada etapa muda conforme o tipo (tabela `NOMES_ETAPAS`): em uma entreg
 
 ## 6. Roteiro para demonstrar (simulação)
 
+Contas que já vêm prontas:
+
+| Conta | Login | Senha | Acesso |
+|---|---|---|---|
+| Admin | `admin` | `admin` | tudo (cozinha, garçom, caixa) |
+| Cliente de teste | `cliente@fornatta.com` ou `18999999999` | `cliente123` | cliente |
+| Gerente / garçons / cozinha | `gerente`, `carlos`, `fernanda`, `cozinha` | `<login>@2026` | cada um o seu |
+
 1. `pip install -r requirements.txt` e depois `python app.py`. Abra `http://localhost:5000`.
-2. **Janela normal:** crie uma conta de cliente, adicione pizzas, escolha
-   "Retirar no balcão", "Dinheiro" e troco para 100. Confirme.
-3. **Janela anônima** (Ctrl+Shift+N): entre como `cozinha` / `cozinha@2026`.
-   O pedido aparece na fila. Clique em "Marcar como pronto".
-4. Volte para a janela do cliente: em até 10 s aparece "Pronto no balcão!".
-5. Na janela anônima, saia e entre como `carlos` / `carlos@2026`. Em
-   "Entregas e retiradas", clique em "Retirado e pago".
-6. Entre como `gerente` / `gerente@2026` e veja o caixa com o valor recebido.
+2. **Aba 1:** entre como cliente (ou crie uma conta na aba "Criar conta"), adicione
+   pizzas, escolha "Retirar no balcão", "Dinheiro" e troco para 100. Confirme.
+3. **Aba 2** (Ctrl+T, no mesmo navegador): entre como `admin` / `admin`.
+   O pedido aparece na fila da cozinha. Clique em "Marcar como pronto".
+4. Volte para a aba 1: em até 10 s aparece "Pronto no balcão!".
+5. Na aba 2, em "Entregas e retiradas", clique em "Retirado e pago" e veja o caixa.
+
+### Por que dá para ter duas contas em duas abas?
+
+No login, o servidor cria um **token** (um código aleatório) e guarda em
+`sessoes[token] = (login, horário que expira)`. O navegador guarda esse token no
+`sessionStorage`, que é **separado em cada aba**, e manda ele em toda chamada no
+cabeçalho `X-Sessao`. A função `usuario_logado()` lê esse cabeçalho para saber
+quem está usando aquela aba. Sair numa aba apaga só o token dela.
+
+### Cadastro e login
+
+- O cadastro pede nome, e-mail, telefone, senha e a senha repetida (`/api/cadastro`).
+  Se der certo, já entra direto.
+- O login aceita e-mail, telefone (com ou sem `+55`, parênteses e traço) ou o
+  usuário da equipe. Quem resolve isso é `encontrar_usuario()` no `app.py`.
 
 ## 7. Perguntas que o professor pode fazer
 

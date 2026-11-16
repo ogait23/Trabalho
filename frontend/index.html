@@ -144,8 +144,82 @@
 
 <footer class="site-footer section-shell"><div><a class="brand" href="#inicio">fornatta<span class="brand-dot">.</span><small>PIZZARIA & BONS MOMENTOS</small></a><p>Uma boa pizza. Um bom motivo para estar junto.</p></div><nav aria-label="Navegação do rodapé"><a href="#secao-cardapio">Cardápio</a><a href="#nosso-jeito">Nosso jeito</a><button class="text-button login-trigger" data-open="acesso-dialog" type="button">Acesso da equipe ↗</button></nav><div class="footer-bottom"><span>© Fornatta. Feita para compartilhar.</span><span>Com carinho, até a última fatia. ♡</span></div></footer>
 
-<!-- ===== Janela de login / cadastro ===== -->
-<dialog id="acesso-dialog" class="app-dialog" aria-labelledby="access-title"><button class="dialog-close" data-close type="button" aria-label="Fechar acesso">×</button><section id="secao-acesso"><p class="eyebrow">BEM-VINDO À MESA</p><h2 id="access-title">Bom te ver <em>por aqui.</em></h2><p>Entre para pedir e acompanhar sua pizza.</p><form id="form-login"><label for="login-usuario">Usuário ou telefone</label><input id="login-usuario" placeholder="Seu telefone com DDD" autocomplete="username" required><label for="login-senha">Senha</label><input id="login-senha" type="password" placeholder="Sua senha" autocomplete="current-password" required><button class="button primary" type="submit">Entrar <span aria-hidden="true">↗</span></button></form><details><summary>Primeira vez? Crie sua conta</summary><form id="form-cadastro"><label for="cadastro-nome">Nome completo</label><input id="cadastro-nome" autocomplete="name" minlength="3" required><label for="cadastro-telefone">Telefone com DDD</label><input id="cadastro-telefone" type="tel" autocomplete="tel" inputmode="tel" required><label for="cadastro-senha">Senha (mínimo de 8 caracteres)</label><input id="cadastro-senha" type="password" minlength="8" autocomplete="new-password" required><button class="button primary" type="submit">Criar conta</button></form></details></section></dialog>
+<!-- ===== Janela de login / cadastro (duas abas) ===== -->
+<dialog id="acesso-dialog" class="app-dialog access-dialog" aria-labelledby="access-title">
+    <button class="dialog-close" data-close type="button" aria-label="Fechar acesso">×</button>
+    <section id="secao-acesso">
+        <p class="eyebrow">BEM-VINDO À MESA</p>
+        <h2 id="access-title">Bom te ver <em>por aqui.</em></h2>
+
+        <div class="access-tabs" role="tablist" aria-label="Entrar ou criar conta">
+            <button type="button" role="tab" id="aba-entrar" data-aba="entrar" aria-selected="true" aria-controls="form-login">Entrar</button>
+            <button type="button" role="tab" id="aba-cadastro" data-aba="cadastro" aria-selected="false" aria-controls="form-cadastro">Criar conta</button>
+            <span class="tab-indicator" aria-hidden="true"></span>
+        </div>
+
+        <!-- Aba 1: entrar -->
+        <form id="form-login" role="tabpanel" aria-labelledby="aba-entrar" novalidate>
+            <p class="form-intro">Cliente entra com o <strong>e-mail ou telefone</strong>. A equipe entra com o usuário.</p>
+            <div class="field">
+                <label for="login-usuario">E-mail, telefone ou usuário</label>
+                <input id="login-usuario" placeholder="nome@gmail.com ou (18) 99999-1234" autocomplete="username" autocapitalize="off" required>
+            </div>
+            <div class="field">
+                <label for="login-senha">Senha</label>
+                <div class="password-field">
+                    <input id="login-senha" type="password" placeholder="Sua senha" autocomplete="current-password" required>
+                    <button type="button" class="show-pass" aria-label="Mostrar senha">Mostrar</button>
+                </div>
+            </div>
+            <p class="form-error" role="alert" hidden></p>
+            <button class="button primary" type="submit">Entrar <span aria-hidden="true">↗</span></button>
+            <p class="switch-note">Ainda não tem conta? <button type="button" class="link-button" data-aba="cadastro">Criar agora</button></p>
+            <div class="demo-accounts">
+                <strong>Contas de teste</strong>
+                <span>Equipe (acesso total): <code>admin</code> / <code>admin</code></span>
+                <span>Cliente: <code>cliente@fornatta.com</code> / <code>cliente123</code></span>
+            </div>
+        </form>
+
+        <!-- Aba 2: criar conta -->
+        <form id="form-cadastro" role="tabpanel" aria-labelledby="aba-cadastro" novalidate hidden>
+            <p class="form-intro">Leva 20 segundos. Depois você <strong>já entra direto</strong> e pode pedir.</p>
+            <div class="field">
+                <label for="cadastro-nome">Seu nome</label>
+                <input id="cadastro-nome" name="nome" placeholder="Como podemos te chamar?" autocomplete="name" required>
+            </div>
+            <div class="field">
+                <label for="cadastro-email">E-mail</label>
+                <input id="cadastro-email" name="email" type="email" inputmode="email" placeholder="nome@gmail.com" autocomplete="email" autocapitalize="off" required>
+            </div>
+            <div class="field">
+                <label for="cadastro-telefone">Telefone com DDD</label>
+                <input id="cadastro-telefone" name="telefone" type="tel" inputmode="tel" placeholder="(18) 99999-1234" autocomplete="tel" required>
+                <small class="hint">Pode digitar com +55. Você entra com o e-mail ou com o telefone.</small>
+            </div>
+            <div class="field">
+                <label for="cadastro-senha">Crie uma senha</label>
+                <div class="password-field">
+                    <input id="cadastro-senha" name="senha" type="password" placeholder="Mínimo de 8 caracteres" autocomplete="new-password" required>
+                    <button type="button" class="show-pass" aria-label="Mostrar senha">Mostrar</button>
+                </div>
+                <div class="strength" aria-hidden="true"><span id="forca-barra"></span></div>
+                <small class="hint" id="forca-texto">Mínimo de 8 caracteres.</small>
+            </div>
+            <div class="field">
+                <label for="cadastro-confirmacao">Repita a senha</label>
+                <div class="password-field">
+                    <input id="cadastro-confirmacao" name="confirmacao" type="password" placeholder="Digite a mesma senha" autocomplete="new-password" required>
+                    <button type="button" class="show-pass" aria-label="Mostrar senha">Mostrar</button>
+                </div>
+                <small class="hint" id="confere-texto"></small>
+            </div>
+            <p class="form-error" role="alert" hidden></p>
+            <button class="button primary" type="submit">Criar conta e entrar <span aria-hidden="true">↗</span></button>
+            <p class="switch-note">Já tem conta? <button type="button" class="link-button" data-aba="entrar">Entrar</button></p>
+        </form>
+    </section>
+</dialog>
 
 <!-- ===== Janela do pedido do cliente ===== -->
 <dialog id="carrinho-dialog" class="app-dialog cart-dialog" aria-labelledby="cart-title">

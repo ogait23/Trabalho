@@ -96,9 +96,15 @@ def montar_dados_iniciais():
     dados.garcons.append(Garcom("Fernanda"))
 
     # Senhas vêm de variáveis de ambiente. Os valores padrão servem só para demonstração.
+    # admin/admin: acesso total (cozinha, garçom e caixa) para apresentar o trabalho.
+    criar_usuario(dados, "admin", "Admin", "gerente", "SENHA_ADMIN", "admin")
     criar_usuario(dados, "gerente", "Gerência", "gerente", "SENHA_GERENTE", "gerente@2026")
     criar_usuario(dados, "carlos", "Carlos", "garcom", "SENHA_CARLOS", "carlos@2026")
     criar_usuario(dados, "fernanda", "Fernanda", "garcom", "SENHA_FERNANDA", "fernanda@2026")
     criar_usuario(dados, "cozinha", "Cozinha", "cozinha", "SENHA_COZINHA", "cozinha@2026")
+
+    # Cliente de teste: entra com cliente@fornatta.com (ou 18999999999) e senha cliente123
+    dados.usuarios["18999999999"] = Usuario("18999999999", "Cliente Teste", "cliente123", "cliente",
+                                            "18999999999", "cliente@fornatta.com")
 
     return dados

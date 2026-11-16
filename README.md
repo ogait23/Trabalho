@@ -55,16 +55,28 @@ e [pizza com tomates e ervas](https://images.unsplash.com/photo-1513104890138-7c
 | Cozinha | Ver a fila de pedidos, marcar como pronto e consultar o estoque         |
 | Gerente | Tudo o que os outros perfis fazem, mais ver e fechar o caixa            |
 
+## Contas de teste
+
+| Conta | Login | Senha |
+|-------|-------|-------|
+| Admin (acesso total: cozinha, garçom e caixa) | `admin` | `admin` |
+| Cliente de teste | `cliente@fornatta.com` ou `18999999999` | `cliente123` |
+
+O cliente também pode criar a própria conta (nome, e-mail, telefone e senha
+repetida) e depois entrar com o e-mail ou com o telefone. Cada aba do navegador
+tem o próprio login: dá para deixar uma aba como cliente e outra como admin.
+
 ## Segurança
 
-1. Autenticação: senhas guardadas com hash, sessão que expira em 8 horas e bloqueio de 5 minutos após 5 erros de senha.
+1. Autenticação: senhas guardadas com hash, login por aba com token que expira em 8 horas e bloqueio de 5 minutos após 5 erros de senha.
 2. Autorização: cada rota da API confere o perfil do usuário. O cliente só enxerga os próprios pedidos.
 3. Requisições: todo POST exige o token CSRF da sessão, e o cookie de sessão é `HttpOnly` e `SameSite=Strict`.
 4. Respostas: cabeçalhos de segurança em todas as respostas e a API nunca fica em cache.
 
-As senhas da equipe vêm das variáveis de ambiente `SENHA_GERENTE`, `SENHA_CARLOS`,
-`SENHA_FERNANDA` e `SENHA_COZINHA`. Os valores padrão (por exemplo `gerente@2026`)
-servem só para demonstração e devem ser trocados. Defina também `SECRET_KEY`.
+As senhas da equipe vêm das variáveis de ambiente `SENHA_ADMIN`, `SENHA_GERENTE`,
+`SENHA_CARLOS`, `SENHA_FERNANDA` e `SENHA_COZINHA`. Os valores padrão (por exemplo
+`admin` e `gerente@2026`) servem só para a demonstração do trabalho e devem ser
+trocados num uso real. Defina também `SECRET_KEY`.
 
 ## Estrutura
 
