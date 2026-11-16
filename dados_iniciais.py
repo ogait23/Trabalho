@@ -1,3 +1,5 @@
+import os
+
 from pizzaria.caixa import Caixa
 from pizzaria.categoria import Categoria
 from pizzaria.cozinha import Cozinha
@@ -5,6 +7,7 @@ from pizzaria.estoque import Estoque
 from pizzaria.garcom import Garcom
 from pizzaria.mesa import Mesa
 from pizzaria.produto import Produto
+from pizzaria.usuario import Usuario
 
 
 class BaseDados:
@@ -15,6 +18,7 @@ class BaseDados:
         self.garcons = []
         self.estoques = []
         self.pedidos = []
+        self.usuarios = {}
         self.cozinha = Cozinha()
         self.caixa = Caixa()
 
@@ -28,40 +32,73 @@ class BaseDados:
         return len(self.pedidos) + 1
 
 
-def criar_produto(dados, nome, preco, categoria, quantidade_estoque, quantidade_minima):
-    produto = Produto(nome, preco, categoria)
+def criar_produto(dados, nome, preco, categoria, descricao, quantidade_estoque, quantidade_minima):
+    produto = Produto(nome, preco, categoria, descricao)
     dados.produtos.append(produto)
     dados.estoques.append(Estoque(produto, quantidade_estoque, quantidade_minima))
     return produto
 
 
+def criar_usuario(dados, login, nome, perfil, variavel_ambiente, senha_demonstracao):
+    senha = os.environ.get(variavel_ambiente, senha_demonstracao)
+    dados.usuarios[login] = Usuario(login, nome, senha, perfil)
+
+
+def montar_cardapio(dados):
+    tradicional = Categoria("Pizzas Tradicionais")
+    especial = Categoria("Pizzas Especiais")
+    doce = Categoria("Pizzas Doces")
+    bebida = Categoria("Bebidas")
+    porcao = Categoria("Porções")
+    sobremesa = Categoria("Sobremesas")
+    dados.categorias.extend([tradicional, especial, doce, bebida, porcao, sobremesa])
+
+    # Pizzas: tamanho grande (35 cm, 8 fatias)
+    criar_produto(dados, "Margherita", 42.0, tradicional, "Molho de tomate, mussarela, tomate fresco e manjericão.", 20, 5)
+    criar_produto(dados, "Mussarela", 38.0, tradicional, "Molho de tomate, mussarela e orégano.", 20, 5)
+    criar_produto(dados, "Calabresa", 40.0, tradicional, "Calabresa fatiada, cebola, mussarela e azeitonas.", 20, 5)
+    criar_produto(dados, "Portuguesa", 46.0, tradicional, "Presunto, ovos, cebola, ervilha, mussarela e azeitonas.", 15, 5)
+    criar_produto(dados, "Frango com Catupiry", 44.0, tradicional, "Frango desfiado, catupiry e mussarela.", 15, 5)
+    criar_produto(dados, "Napolitana", 42.0, tradicional, "Mussarela, rodelas de tomate, parmesão e manjericão.", 15, 5)
+
+    criar_produto(dados, "Quatro Queijos", 52.0, especial, "Mussarela, provolone, gorgonzola e parmesão.", 15, 5)
+    criar_produto(dados, "Pepperoni", 54.0, especial, "Pepperoni artesanal e mussarela de búfala.", 15, 5)
+    criar_produto(dados, "Bacon com Cheddar", 52.0, especial, "Bacon crocante, cheddar cremoso e cebola caramelizada.", 15, 5)
+    criar_produto(dados, "Parma com Rúcula", 58.0, especial, "Presunto de Parma, rúcula, tomate seco e lascas de parmesão.", 10, 3)
+    criar_produto(dados, "Burrata", 64.0, especial, "Molho de tomate, burrata, tomate cereja e pesto de manjericão.", 10, 3)
+
+    criar_produto(dados, "Chocolate com Morango", 48.0, doce, "Chocolate ao leite e morangos frescos.", 10, 3)
+    criar_produto(dados, "Banana com Canela", 44.0, doce, "Banana, açúcar, canela e mussarela.", 10, 3)
+    criar_produto(dados, "Romeu e Julieta", 46.0, doce, "Mussarela e goiabada cremosa.", 10, 3)
+
+    criar_produto(dados, "Refrigerante 2L", 14.0, bebida, "Coca-Cola, Guaraná ou Fanta.", 30, 10)
+    criar_produto(dados, "Refrigerante Lata", 6.0, bebida, "Lata de 350 ml.", 48, 12)
+    criar_produto(dados, "Suco Natural de Laranja", 10.0, bebida, "Copo de 400 ml, sem adição de açúcar.", 20, 6)
+    criar_produto(dados, "Água Mineral", 5.0, bebida, "Garrafa de 500 ml, com ou sem gás.", 40, 10)
+    criar_produto(dados, "Cerveja Long Neck", 12.0, bebida, "Long neck de 330 ml. Venda somente para maiores de 18 anos.", 24, 6)
+
+    criar_produto(dados, "Pão de Alho", 18.0, porcao, "Seis unidades com alho assado e ervas.", 25, 8)
+    criar_produto(dados, "Batata Frita", 28.0, porcao, "Porção de 400 g com cheddar e bacon à parte.", 20, 5)
+    criar_produto(dados, "Bruschetta", 24.0, porcao, "Quatro fatias com tomate, manjericão e azeite.", 20, 5)
+
+    criar_produto(dados, "Petit Gâteau", 24.0, sobremesa, "Bolo de chocolate com sorvete de creme.", 15, 4)
+    criar_produto(dados, "Pudim", 14.0, sobremesa, "Pudim de leite condensado com calda de caramelo.", 15, 4)
+
+
 def montar_dados_iniciais():
     dados = BaseDados()
-
-    pizza_salgada = Categoria("Pizza Salgada")
-    pizza_doce = Categoria("Pizza Doce")
-    bebida = Categoria("Bebida")
-    porcao = Categoria("Porção")
-    dados.categorias.extend([pizza_salgada, pizza_doce, bebida, porcao])
-
-    criar_produto(dados, "Calabresa", 28.0, pizza_salgada, 20, 5)
-    criar_produto(dados, "Quatro Queijos", 32.0, pizza_salgada, 15, 5)
-    criar_produto(dados, "Frango com Catupiry", 30.0, pizza_salgada, 15, 5)
-    criar_produto(dados, "Chocolate", 30.0, pizza_doce, 10, 3)
-    criar_produto(dados, "Banana com Canela", 26.0, pizza_doce, 10, 3)
-    criar_produto(dados, "Refrigerante 2L", 10.0, bebida, 30, 10)
-    criar_produto(dados, "Água Mineral", 5.0, bebida, 40, 10)
-    criar_produto(dados, "Cerveja Long Neck", 12.0, bebida, 24, 6)
-    criar_produto(dados, "Batata Frita", 22.0, porcao, 20, 5)
-    criar_produto(dados, "Calabresa Acebolada", 24.0, porcao, 20, 5)
-    criar_produto(dados, "Frango a Passarinho", 26.0, porcao, 15, 5)
-    criar_produto(dados, "Anéis de Cebola", 20.0, porcao, 15, 5)
-    criar_produto(dados, "Pão de Alho", 14.0, porcao, 25, 8)
+    montar_cardapio(dados)
 
     for numero in range(1, 7):
         dados.mesas.append(Mesa(numero, capacidade=4))
 
     dados.garcons.append(Garcom("Carlos"))
     dados.garcons.append(Garcom("Fernanda"))
+
+    # Senhas vêm de variáveis de ambiente. Os valores padrão servem só para demonstração.
+    criar_usuario(dados, "gerente", "Gerência", "gerente", "SENHA_GERENTE", "gerente@2026")
+    criar_usuario(dados, "carlos", "Carlos", "garcom", "SENHA_CARLOS", "carlos@2026")
+    criar_usuario(dados, "fernanda", "Fernanda", "garcom", "SENHA_FERNANDA", "fernanda@2026")
+    criar_usuario(dados, "cozinha", "Cozinha", "cozinha", "SENHA_COZINHA", "cozinha@2026")
 
     return dados

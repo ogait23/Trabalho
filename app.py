@@ -1,10 +1,84 @@
-from flask import Flask, jsonify, request, send_from_directory
+import os
+import re
+import secrets
+import time
+from datetime import timedelta
+from functools import wraps
+
+from flask import Flask, jsonify, request, send_from_directory, session
 
 from dados_iniciais import montar_dados_iniciais
+from pizzaria.pagamento import FORMAS_PRESENCIAIS
 from pizzaria.pedido import Pedido, STATUS_FINALIZADOS
+from pizzaria.usuario import Usuario
 
 app = Flask(__name__, static_folder=None)
+app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Strict",
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
+)
 dados = montar_dados_iniciais()
+
+MAX_TENTATIVAS = 5
+BLOQUEIO_SEGUNDOS = 300
+tentativas = {}
+
+
+# ---------- Segurança ----------
+# Nível 1: autenticação (senha com hash, sessão com expiração, bloqueio após 5 erros)
+# Nível 2: autorização por perfil (cliente, garçom, cozinha, gerente)
+# Nível 3: proteção de requisições (token CSRF em todo POST, cookie Strict)
+# Nível 4: proteção das respostas (cabeçalhos de segurança, sem cache da API)
+
+def usuario_logado():
+    return dados.usuarios.get(session.get("login"))
+
+
+def exige(*perfis):
+    def decorador(funcao):
+        @wraps(funcao)
+        def interno(*args, **kwargs):
+            usuario = usuario_logado()
+            if usuario is None:
+                return jsonify({"erro": "Faça login para continuar."}), 401
+            if usuario.perfil != "gerente" and usuario.perfil not in perfis:
+                return jsonify({"erro": "Você não tem permissão para isso."}), 403
+            return funcao(*args, **kwargs)
+        return interno
+    return decorador
+
+
+@app.before_request
+def proteger_requisicao():
+    if "csrf" not in session:
+        session["csrf"] = secrets.token_hex(16)
+        session.permanent = True
+    if request.method == "POST" and request.headers.get("X-CSRF-Token") != session["csrf"]:
+        return jsonify({"erro": "Requisição inválida. Recarregue a página."}), 403
+
+
+@app.after_request
+def cabecalhos_seguranca(resposta):
+    resposta.headers["X-Content-Type-Options"] = "nosniff"
+    resposta.headers["X-Frame-Options"] = "DENY"
+    resposta.headers["Referrer-Policy"] = "same-origin"
+    resposta.headers["Content-Security-Policy"] = "default-src 'self'"
+    if request.path.startswith("/api/"):
+        resposta.headers["Cache-Control"] = "no-store"
+    return resposta
+
+
+def corpo_json():
+    corpo = request.get_json(silent=True)
+    return corpo if isinstance(corpo, dict) else {}
+
+
+# ---------- Conversão para JSON ----------
+
+def usuario_para_dict(usuario):
+    return {"nome": usuario.nome, "perfil": usuario.perfil}
 
 
 def mesa_para_dict(mesa):
@@ -13,30 +87,33 @@ def mesa_para_dict(mesa):
         if pedido.mesa is mesa and pedido.status not in STATUS_FINALIZADOS:
             pedido_aberto = pedido.numero
             break
-    return {
-        "numero": mesa.numero,
-        "capacidade": mesa.capacidade,
-        "status": mesa.status,
-        "pedidoAberto": pedido_aberto,
-    }
+    return {"numero": mesa.numero, "capacidade": mesa.capacidade, "status": mesa.status, "pedidoAberto": pedido_aberto}
 
 
 def produto_para_dict(produto):
-    return {"nome": produto.nome, "preco": produto.preco, "categoria": produto.categoria.nome}
+    return {
+        "nome": produto.nome,
+        "preco": produto.preco,
+        "descricao": produto.descricao,
+        "categoria": produto.categoria.nome,
+    }
 
 
 def item_para_dict(item):
-    return {
-        "produto": item["produto"].nome,
-        "quantidade": item["quantidade"],
-        "precoUnitario": item["precoUnitario"],
-    }
+    return {"produto": item["produto"].nome, "quantidade": item["quantidade"], "precoUnitario": item["precoUnitario"]}
 
 
 def pedido_para_dict(pedido):
     return {
         "numero": pedido.numero,
-        "mesa": pedido.mesa.numero,
+        "tipo": pedido.tipo,
+        "mesa": pedido.mesa.numero if pedido.mesa else None,
+        "cliente": pedido.cliente.nome if pedido.cliente else None,
+        "telefone": pedido.cliente.telefone if pedido.cliente else None,
+        "endereco": pedido.endereco,
+        "formaPagamento": pedido.formaPagamento,
+        "trocoPara": pedido.trocoPara,
+        "observacao": pedido.observacao,
         "status": pedido.status,
         "valorTotal": pedido.valorTotal,
         "itens": [item_para_dict(item) for item in pedido.itens],
@@ -52,33 +129,84 @@ def estoque_para_dict(estoque):
     }
 
 
+# ---------- Buscas e regras auxiliares ----------
+
 def encontrar_mesa(numero):
-    for mesa in dados.mesas:
-        if mesa.numero == numero:
-            return mesa
-    return None
+    return next((mesa for mesa in dados.mesas if mesa.numero == numero), None)
 
 
 def encontrar_pedido(numero):
-    for pedido in dados.pedidos:
-        if pedido.numero == numero:
-            return pedido
-    return None
+    return next((pedido for pedido in dados.pedidos if pedido.numero == numero), None)
 
 
 def encontrar_produto(nome):
-    for produto in dados.produtos:
-        if produto.nome == nome:
-            return produto
-    return None
+    return next((produto for produto in dados.produtos if produto.nome == nome), None)
 
 
 def encontrar_garcom(nome):
-    for garcom in dados.garcons:
-        if garcom.nome == nome:
-            return garcom
-    return None
+    return next((garcom for garcom in dados.garcons if garcom.nome == nome), None)
 
+
+def validar_itens(itens):
+    """Confere produtos, quantidades e estoque antes de alterar qualquer coisa."""
+    if not isinstance(itens, list) or not itens:
+        raise ValueError("O pedido precisa ter pelo menos um item.")
+    totais = {}
+    for item in itens:
+        if not isinstance(item, dict):
+            raise ValueError("Item inválido.")
+        produto = encontrar_produto(str(item.get("produto", "")))
+        if produto is None:
+            raise ValueError("Produto não encontrado.")
+        try:
+            quantidade = int(item.get("quantidade", 1))
+        except (TypeError, ValueError):
+            raise ValueError("Quantidade inválida.")
+        if not 1 <= quantidade <= 20:
+            raise ValueError("A quantidade deve ser de 1 a 20.")
+        totais[produto] = totais.get(produto, 0) + quantidade
+    for produto, quantidade in totais.items():
+        estoque = dados.estoque_do_produto(produto)
+        if estoque is not None and estoque.quantidade < quantidade:
+            raise ValueError(f"Estoque insuficiente de {produto.nome}.")
+    return list(totais.items())
+
+
+def validar_pagamento(corpo, total):
+    """O cliente só escolhe COMO vai pagar. O dinheiro é recebido na entrega ou no balcão."""
+    forma = str(corpo.get("formaPagamento", ""))
+    if forma not in FORMAS_PRESENCIAIS:
+        raise ValueError("Escolha dinheiro, débito ou crédito. O pagamento é feito na hora.")
+
+    troco = 0
+    if forma == "dinheiro" and corpo.get("trocoPara"):
+        try:
+            troco = float(corpo["trocoPara"])
+        except (TypeError, ValueError):
+            raise ValueError("Valor do troco inválido.")
+        if troco < total:
+            raise ValueError("O troco precisa ser para um valor maior que o total.")
+    return forma, troco
+
+
+def lancar_itens(pedido, itens_validados):
+    for produto, quantidade in itens_validados:
+        pedido.adicionarItem(produto, quantidade)
+        estoque = dados.estoque_do_produto(produto)
+        if estoque is not None:
+            estoque.atualizarQuantidade(-quantidade)
+
+
+def pode_ver(pedido, usuario):
+    return usuario.perfil != "cliente" or pedido.cliente is usuario
+
+
+def enviar_para_fila_da_cozinha(pedido):
+    dados.cozinha.pedidosPendentes.append(pedido)
+    pedido.status = "em_preparo"
+
+
+# ---------- Páginas ----------
 
 @app.route("/")
 def pagina_inicial():
@@ -90,109 +218,218 @@ def arquivos_estaticos(nome_arquivo):
     return send_from_directory("frontend", nome_arquivo)
 
 
-@app.route("/api/mesas")
-def listar_mesas():
-    return jsonify([mesa_para_dict(mesa) for mesa in dados.mesas])
+# ---------- Sessão ----------
 
+@app.route("/api/sessao")
+def ver_sessao():
+    usuario = usuario_logado()
+    return jsonify({"csrf": session["csrf"], "usuario": usuario_para_dict(usuario) if usuario else None})
+
+
+@app.route("/api/login", methods=["POST"])
+def entrar():
+    corpo = corpo_json()
+    login = str(corpo.get("login", "")).strip().lower()
+    chave = (login, request.remote_addr)
+
+    quantidade, bloqueado_ate = tentativas.get(chave, (0, 0))
+    agora = time.time()
+    if bloqueado_ate > agora:
+        return jsonify({"erro": "Muitas tentativas. Aguarde alguns minutos e tente de novo."}), 429
+    if bloqueado_ate:
+        quantidade = 0
+
+    usuario = dados.usuarios.get(login)
+    if usuario is None or not usuario.verificarSenha(str(corpo.get("senha", ""))):
+        quantidade += 1
+        tentativas[chave] = (quantidade, agora + BLOQUEIO_SEGUNDOS if quantidade >= MAX_TENTATIVAS else 0)
+        return jsonify({"erro": "Usuário ou senha incorretos."}), 401
+
+    tentativas.pop(chave, None)
+    session.clear()
+    session["csrf"] = secrets.token_hex(16)
+    session["login"] = usuario.login
+    session.permanent = True
+    return jsonify({"csrf": session["csrf"], "usuario": usuario_para_dict(usuario)})
+
+
+@app.route("/api/sair", methods=["POST"])
+def sair():
+    session.clear()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/cadastro", methods=["POST"])
+def cadastrar_cliente():
+    corpo = corpo_json()
+    nome = str(corpo.get("nome", "")).strip()
+    telefone = re.sub(r"\D", "", str(corpo.get("telefone", "")))
+    senha = str(corpo.get("senha", ""))
+
+    if len(nome) < 3:
+        return jsonify({"erro": "Informe seu nome."}), 400
+    if len(telefone) not in (10, 11):
+        return jsonify({"erro": "Informe o telefone com DDD."}), 400
+    if len(senha) < 8:
+        return jsonify({"erro": "A senha precisa ter pelo menos 8 caracteres."}), 400
+    if telefone in dados.usuarios:
+        return jsonify({"erro": "Este telefone já está cadastrado."}), 400
+
+    dados.usuarios[telefone] = Usuario(telefone, nome, senha, "cliente", telefone)
+    return jsonify({"ok": True}), 201
+
+
+# ---------- Cardápio (público) ----------
 
 @app.route("/api/produtos")
 def listar_produtos():
     return jsonify([produto_para_dict(produto) for produto in dados.produtos])
 
 
-@app.route("/api/garcons")
-def listar_garcons():
-    return jsonify([garcom.nome for garcom in dados.garcons])
+# ---------- Cliente: entrega ou retirada no balcão ----------
+
+@app.route("/api/meus-pedidos", methods=["POST"])
+@exige("cliente")
+def criar_pedido_cliente():
+    usuario = usuario_logado()
+    corpo = corpo_json()
+
+    tipo = corpo.get("tipo")
+    if tipo not in ("entrega", "retirada"):
+        return jsonify({"erro": "Escolha entrega ou retirada no balcão."}), 400
+
+    endereco = str(corpo.get("endereco", "")).strip()
+    if tipo == "entrega" and len(endereco) < 10:
+        return jsonify({"erro": "Informe o endereço completo para entrega."}), 400
+    if tipo == "retirada":
+        endereco = ""
+
+    observacao = str(corpo.get("observacao", "")).strip()[:140]
+
+    # 1) valida tudo antes  2) só depois cria o pedido
+    try:
+        itens = validar_itens(corpo.get("itens"))
+        total = sum(produto.preco * quantidade for produto, quantidade in itens)
+        forma, troco = validar_pagamento(corpo, total)
+    except ValueError as erro:
+        return jsonify({"erro": str(erro)}), 400
+
+    pedido = Pedido(dados.proximo_numero_pedido(), None, tipo, usuario, endereco, forma, troco, observacao)
+    pedido.lancarPedido()
+    lancar_itens(pedido, itens)
+    dados.pedidos.append(pedido)
+    enviar_para_fila_da_cozinha(pedido)
+    return jsonify(pedido_para_dict(pedido)), 201
 
 
-@app.route("/api/estoque")
-def listar_estoque():
-    return jsonify([estoque_para_dict(estoque) for estoque in dados.estoques])
+@app.route("/api/meus-pedidos")
+@exige("cliente")
+def meus_pedidos():
+    usuario = usuario_logado()
+    return jsonify([pedido_para_dict(p) for p in reversed(dados.pedidos) if p.cliente is usuario])
 
 
-@app.route("/api/cozinha")
-def listar_cozinha():
-    return jsonify([pedido_para_dict(pedido) for pedido in dados.cozinha.pedidosPendentes])
+# ---------- Garçom: salão e entregas ----------
 
-
-@app.route("/api/caixa")
-def ver_caixa():
-    return jsonify({"totalRecebido": dados.caixa.totalRecebido})
-
-
-@app.route("/api/pedidos/<int:numero>")
-def ver_pedido(numero):
-    pedido = encontrar_pedido(numero)
-    if pedido is None:
-        return jsonify({"erro": "Pedido não encontrado."}), 404
-    return jsonify(pedido_para_dict(pedido))
+@app.route("/api/mesas")
+@exige("garcom")
+def listar_mesas():
+    return jsonify([mesa_para_dict(mesa) for mesa in dados.mesas])
 
 
 @app.route("/api/mesas/<int:numero>/pedido", methods=["POST"])
+@exige("garcom")
 def abrir_pedido(numero):
     mesa = encontrar_mesa(numero)
     if mesa is None:
         return jsonify({"erro": "Mesa não encontrada."}), 404
-
-    corpo = request.get_json(force=True)
-    garcom = encontrar_garcom(corpo.get("garcom", ""))
-    if garcom is None:
-        return jsonify({"erro": "Garçom não encontrado."}), 400
 
     try:
         mesa.ocupar()
     except ValueError as erro:
         return jsonify({"erro": str(erro)}), 400
 
-    garcom.atenderMesa(mesa)
+    garcom = encontrar_garcom(usuario_logado().nome)
+    if garcom is not None:
+        garcom.atenderMesa(mesa)
 
-    pedido = Pedido(len(dados.pedidos) + 1, mesa)
+    pedido = Pedido(dados.proximo_numero_pedido(), mesa)
     pedido.lancarPedido()
     dados.pedidos.append(pedido)
-
     return jsonify(pedido_para_dict(pedido)), 201
 
 
+@app.route("/api/pedidos/<int:numero>")
+@exige("garcom", "cliente")
+def ver_pedido(numero):
+    pedido = encontrar_pedido(numero)
+    if pedido is None or not pode_ver(pedido, usuario_logado()):
+        return jsonify({"erro": "Pedido não encontrado."}), 404
+    return jsonify(pedido_para_dict(pedido))
+
+
 @app.route("/api/pedidos/<int:numero>/itens", methods=["POST"])
+@exige("garcom")
 def adicionar_item(numero):
     pedido = encontrar_pedido(numero)
     if pedido is None:
         return jsonify({"erro": "Pedido não encontrado."}), 404
 
-    corpo = request.get_json(force=True)
-    produto = encontrar_produto(corpo.get("produto", ""))
-    if produto is None:
-        return jsonify({"erro": "Produto não encontrado."}), 400
-
-    quantidade = int(corpo.get("quantidade", 1))
-    estoque = dados.estoque_do_produto(produto)
-
-    if estoque is not None and estoque.quantidade < quantidade:
-        return jsonify({"erro": "Estoque insuficiente."}), 400
-
     try:
-        pedido.adicionarItem(produto, quantidade)
+        itens = validar_itens([corpo_json()])
+        lancar_itens(pedido, itens)
     except ValueError as erro:
         return jsonify({"erro": str(erro)}), 400
-
-    if estoque is not None:
-        estoque.atualizarQuantidade(-quantidade)
-
     return jsonify(pedido_para_dict(pedido))
 
 
 @app.route("/api/pedidos/<int:numero>/cozinha", methods=["POST"])
+@exige("garcom")
 def enviar_para_cozinha(numero):
     pedido = encontrar_pedido(numero)
     if pedido is None:
         return jsonify({"erro": "Pedido não encontrado."}), 404
+    if pedido.status != "recebido" or not pedido.itens:
+        return jsonify({"erro": "Adicione itens antes de enviar para a cozinha."}), 400
 
-    dados.cozinha.pedidosPendentes.append(pedido)
-    pedido.status = "em_preparo"
+    enviar_para_fila_da_cozinha(pedido)
     return jsonify(pedido_para_dict(pedido))
 
 
+@app.route("/api/pedidos-clientes")
+@exige("garcom")
+def listar_pedidos_clientes():
+    """Pedidos feitos pelo site (entrega e retirada) que ainda não foram pagos."""
+    ativos = [p for p in dados.pedidos if p.tipo != "salao" and p.status not in STATUS_FINALIZADOS]
+    return jsonify([pedido_para_dict(pedido) for pedido in ativos])
+
+
+@app.route("/api/pedidos/<int:numero>/fechar", methods=["POST"])
+@exige("garcom")
+def fechar_conta(numero):
+    pedido = encontrar_pedido(numero)
+    if pedido is None:
+        return jsonify({"erro": "Pedido não encontrado."}), 404
+
+    # Se o garçom não escolher, usa a forma que o cliente informou no pedido.
+    forma = str(corpo_json().get("formaPagamento") or pedido.formaPagamento)
+    try:
+        pedido.fecharConta(forma, dados.caixa)
+    except ValueError as erro:
+        return jsonify({"erro": str(erro)}), 400
+    return jsonify(pedido_para_dict(pedido))
+
+
+# ---------- Cozinha ----------
+
+@app.route("/api/cozinha")
+@exige("cozinha")
+def listar_cozinha():
+    return jsonify([pedido_para_dict(pedido) for pedido in dados.cozinha.pedidosPendentes])
+
+
 @app.route("/api/pedidos/<int:numero>/preparar", methods=["POST"])
+@exige("cozinha")
 def preparar_pedido(numero):
     pedido = encontrar_pedido(numero)
     if pedido is None:
@@ -202,32 +439,28 @@ def preparar_pedido(numero):
         dados.cozinha.prepararPedido(pedido)
     except ValueError as erro:
         return jsonify({"erro": str(erro)}), 400
-
     return jsonify(pedido_para_dict(pedido))
 
 
-@app.route("/api/pedidos/<int:numero>/fechar", methods=["POST"])
-def fechar_conta(numero):
-    pedido = encontrar_pedido(numero)
-    if pedido is None:
-        return jsonify({"erro": "Pedido não encontrado."}), 404
+@app.route("/api/estoque")
+@exige("cozinha")
+def listar_estoque():
+    return jsonify([estoque_para_dict(estoque) for estoque in dados.estoques])
 
-    corpo = request.get_json(force=True)
-    forma = corpo.get("formaPagamento", "")
 
-    try:
-        pedido.fecharConta(forma, dados.caixa)
-    except ValueError as erro:
-        return jsonify({"erro": str(erro)}), 400
+# ---------- Gerente: caixa ----------
 
-    return jsonify(pedido_para_dict(pedido))
+@app.route("/api/caixa")
+@exige("gerente")
+def ver_caixa():
+    return jsonify({"totalRecebido": dados.caixa.totalRecebido})
 
 
 @app.route("/api/caixa/fechar", methods=["POST"])
+@exige("gerente")
 def fechar_caixa():
-    total = dados.caixa.fecharCaixa()
-    return jsonify({"total": total})
+    return jsonify({"total": dados.caixa.fecharCaixa()})
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=os.environ.get("FLASK_DEBUG") == "1")
